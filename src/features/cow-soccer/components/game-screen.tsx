@@ -333,7 +333,11 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
                 filter: "drop-shadow(0 3px 2px rgba(0,0,0,0.35))",
               }}
             >
-              {ICONS[it.type]}
+              {it.type === "beef" ? (
+                <img src={ICONS.beef} alt="beef" width={96} height={60} draggable={false} />
+              ) : (
+                ICONS[it.type]
+              )}
             </div>
           ))}
 
@@ -359,7 +363,8 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
             className="flex items-center gap-2 rounded-full px-4 py-2 text-xl font-extrabold"
             style={{ background: "rgba(255,255,255,0.95)", color: "#b91c1c", boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }}
           >
-            🥩 {st ? st.score : 0}
+            <img src={ICONS.beef} alt="beef" width={51} height={32} />
+            {st ? st.score : 0}
             <span className="text-gray-400 text-base font-bold">/{config.winScore}</span>
           </div>
           <div
@@ -390,7 +395,8 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
                 <p className="mt-6 text-xl px-8 text-center">
                   Kéo ngang để điều khiển bò 🐄
                   <br />
-                  Ăn 🥩 lấy điểm — né ⚽ và 🧑‍⚖️ nhé!
+                  Ăn <img src={ICONS.beef} alt="beef" width={45} height={29} style={{ display: "inline", verticalAlign: "middle" }} /> lấy
+                  điểm — né ⚽ và 🧑‍⚖️ nhé!
                 </p>
               </>
             )}

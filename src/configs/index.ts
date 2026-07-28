@@ -3,7 +3,7 @@
 export type SpeedLevel = "slow" | "medium" | "fast";
 
 export interface GameConfig {
-  winScore: number; // điểm tối thiểu để thắng (mỗi 🥩 = BEEF_POINT điểm)
+  winScore: number; // điểm tối thiểu để thắng (mỗi vật phẩm beef = BEEF_POINT điểm)
   duration: number; // giây / lượt
   speed: SpeedLevel;
 }
@@ -44,4 +44,4 @@ export const SPEED_PRESETS: Record<SpeedLevel, SpeedPreset> = {
 export const BEEF_POINT = 10;
 export const COW_R = 30;
 export const RADII: Record<ItemType, number> = { beef: 22, ball: 22, ref: 26 };
-export const ICONS: Record<ItemType, string> = { beef: "🥩", ball: "⚽", ref: "🧑‍⚖️" };
+export const ICONS: Record<ItemType, string> = { beef: "/coin_plus_one_icon.svg", ball: "⚽", ref: "🧑‍⚖️" };

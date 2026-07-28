@@ -64,7 +64,9 @@ export default function ConfigPanel({ config, setConfig, records, onClose }: Con
               value={draft.winScore}
               onChange={(e) => setDraft({ ...draft, winScore: Math.max(10, +e.target.value || 10) })}
             />
-            <p className="text-xs text-gray-400 mt-1">Mỗi 🥩 = {BEEF_POINT} điểm</p>
+            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+              Mỗi <img src="/coin_plus_one_icon.svg" alt="beef" width={36} height={23} /> = {BEEF_POINT} điểm
+            </p>
           </div>
           <div>
             <label className="font-semibold text-gray-700 block mb-1">Thời gian (giây)</label>
