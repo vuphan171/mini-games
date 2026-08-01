@@ -1,6 +1,18 @@
-import { useRef, useState } from "react";
-import { STORES } from "../../../configs";
-import { ensureAudioContext } from "../../../lib/audio";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { STORES } from "@/configs";
+import { ensureAudioContext } from "@/lib/audio";
+import { customerFormSchema, type CustomerFormValues } from "../schema";
 import type { Customer } from "../types";
 
 interface CustomerFormProps {
@@ -8,105 +20,171 @@ interface CustomerFormProps {
   onOpenConfig: () => void;
 }
 
-type FormErrors = Partial<Record<"name" | "email" | "phone", string>>;
+export default function CustomerForm({
+  onStart,
+  onOpenConfig,
+}: CustomerFormProps) {
+  const { control, handleSubmit, formState } = useForm<CustomerFormValues>({
+    resolver: zodResolver(customerFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      store: STORES[STORES.length - 1],
+    },
+  });
 
-export default function CustomerForm({ onStart, onOpenConfig }: CustomerFormProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [store, setStore] = useState(STORES[STORES.length - 1]);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const validate = () => {
-    const e: FormErrors = {};
-    if (!name.trim()) e.name = "Vui lòng nhập tên khách hàng";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = "Email không hợp lệ";
-    if (!/^0\d{9,10}$/.test(phone.trim())) e.phone = "SĐT không hợp lệ (bắt đầu bằng 0, 10-11 số)";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const submit = () => {
+  const onSubmit = (data: CustomerFormValues) => {
     ensureAudioContext();
-    if (validate()) onStart({ name: name.trim(), email: email.trim(), phone: phone.trim(), store });
+    onStart(data);
   };
-
-  const inputCls = (err?: string) =>
-    "w-full px-4 py-3 rounded-xl border-2 text-lg outline-none " +
-    (err ? "border-red-400 bg-red-50" : "border-emerald-200 bg-white focus:border-emerald-500");
 
   return (
     <div
-      className="w-full flex items-center justify-center p-6"
-      style={{ minHeight: "100vh", background: "linear-gradient(160deg,#065f46,#059669 55%,#34d399)" }}
+      className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6"
+      style={{
+        background:
+          "linear-gradient(180deg,#7ec9f0 0%,#a5dcb0 22%,#3c9448 40%,#2c7a37 100%)",
+      }}
     >
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 relative">
-        <button onClick={onOpenConfig} className="absolute top-4 right-4 text-2xl opacity-30" aria-label="Cài đặt">
-          ⚙️
-        </button>
+      <button
+        type="button"
+        onClick={onOpenConfig}
+        className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
+        aria-label="Cài đặt"
+      >
+        ⚙️
+      </button>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex w-full max-w-xl flex-col items-center gap-3.5 py-7"
+      >
+        <div className="flex flex-col items-center gap-0.5 text-center">
+          <div className="text-7xl">🐮</div>
+          <h1
+            className="text-5xl leading-none font-extrabold text-white"
+            style={{
+              textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)",
+            }}
+          >
+            SIÊU BÒ ÚC
+          </h1>
+          <h2
+            className="text-2xl leading-tight font-extrabold text-[#ffd54f]"
+            style={{ textShadow: "0 3px 0 #8a5a00, 0 5px 12px rgba(0,0,0,.3)" }}
+          >
+            ⚽ SÚT BÓNG ⚽
+          </h2>
+        </div>
 
         <div
-          className="text-center mb-6 select-none"
-          onTouchStart={() => {
-            holdTimer.current = setTimeout(onOpenConfig, 1500);
+          className="flex w-full flex-col gap-3.5 rounded-[22px] border-4 p-6"
+          style={{
+            borderColor: "#21351f",
+            background: "#fff8e7",
+            boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
           }}
-          onTouchEnd={() => clearTimeout(holdTimer.current)}
         >
-          <div className="text-6xl mb-2">🐄⚽</div>
-          <h1 className="text-3xl font-extrabold text-emerald-800">SIÊU BÒ SÚT BÓNG</h1>
-          <p className="text-emerald-600 mt-1">Nhập thông tin để bắt đầu chơi và nhận quà!</p>
+          <p className="text-center text-lg font-bold text-[#2c7a37]">
+            Nhập thông tin để bắt đầu 🎮
+          </p>
+
+          <Controller
+            name="name"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Tên khách hàng *</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  placeholder="Nguyễn Văn A"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.isTouched && fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Email *</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  placeholder="a@email.com"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.isTouched && fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Số điện thoại *</FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  placeholder="0901234567"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.isTouched && fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="store"
+            control={control}
+            render={({ field }) => (
+              <Field>
+                <FieldLabel htmlFor="store">Cửa hàng *</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger size="lg" id="store" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STORES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!formState.isValid}
+            className="mt-1 h-15 w-full rounded-2xl border-4 border-[#21351f] bg-[#ffb300] text-2xl font-extrabold text-[#4a2f00] shadow-[0_6px_0_#8a5a00] hover:bg-[#ffb300]/90 disabled:border-[#a4ac96] disabled:bg-[#d5d9c8] disabled:text-[#8b937f] disabled:shadow-[0_6px_0_#a4ac96]"
+          >
+            ▶ BẮT ĐẦU CHƠI
+          </Button>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">Tên khách hàng</label>
-            <input
-              className={inputCls(errors.name)}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nguyễn Văn A"
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">Email</label>
-            <input
-              className={inputCls(errors.email)}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@vidu.com"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">Số điện thoại</label>
-            <input
-              className={inputCls(errors.phone)}
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="0901234567"
-            />
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">Cửa hàng</label>
-            <select className={inputCls()} value={store} onChange={(e) => setStore(e.target.value)}>
-              {STORES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <button onClick={submit} className="mt-7 w-full py-4 rounded-2xl bg-emerald-600 text-white text-xl font-bold shadow-lg">
-          BẮT ĐẦU CHƠI 🎮
-        </button>
-      </div>
+        <p className="text-xs text-white/75">
+          Admin: thêm <span className="font-mono">?admin</span> vào URL để mở
+          cài đặt
+        </p>
+      </form>
     </div>
   );
 }
