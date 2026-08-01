@@ -1,10 +1,10 @@
 import { Fragment, useEffect, useState } from "react";
-import { BEEF_POINT, type GameConfig } from "@/configs";
 import { REWARD_TIERS } from "../configs/reward-tiers";
 import { Button } from "@/components/ui/button";
+import type { GameV2Config } from "../configs/game-v2";
 
 interface TutorialScreenProps {
-  config: GameConfig;
+  config: GameV2Config;
   onStart: () => void;
 }
 
@@ -67,22 +67,30 @@ export default function TutorialScreen({
               </span>
             </div>
             <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">🥩</span>
+              <span className="shrink-0 text-3xl">🌾🌿</span>
               <span>
-                Ăn <b>thịt bò</b> để cộng điểm, mỗi miếng +{BEEF_POINT} điểm.
+                Ăn <b>lúa</b> +{config.pointsPerGrain} điểm, <b>cỏ</b> +
+                {config.pointsPerGrass} điểm.
               </span>
             </div>
             <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">⚽🧑‍⚖️</span>
+              <span className="shrink-0 text-3xl">💉🦠🧑‍⚖️</span>
               <span>
-                Né <b>bóng, trọng tài</b> — đụng phải là thua ngay!
+                Né <b>vắc-xin, vi-rút, trọng tài</b> — đụng phải là thua ngay!
               </span>
             </div>
             <div className="flex items-center gap-3.5">
               <span className="shrink-0 text-3xl">⏱️</span>
               <span>
-                Đạt <b>{config.winScore} điểm</b> trong{" "}
-                <b>{config.duration} giây</b> là THẮNG!
+                {config.unlimitedTime ? (
+                  <>
+                    Đạt <b>{config.winningScore} điểm</b> là THẮNG!
+                  </>
+                ) : (
+                  <>
+                    Trụ vững hết <b>{config.timeLimit} giây</b> là THẮNG!
+                  </>
+                )}
               </span>
             </div>
           </div>

@@ -19,24 +19,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
+import { GAME_SPEED_OPTIONS, DEFAULT_GAME_CONFIG } from "./configs";
 import { getGameConfig, saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
-
-const DEFAULT_CONFIG: SettingsFormValues = {
-  pointsPerGrain: 10,
-  pointsPerGrass: 10,
-  unlimitedTime: false,
-  timeLimit: 45,
-  gameSpeed: GameSpeeds.normal,
-};
 
 const AdminConfigs = () => {
   const navigate = useNavigate();
 
   const { control, handleSubmit, watch } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: getGameConfig() ?? DEFAULT_CONFIG,
+    defaultValues: getGameConfig() ?? DEFAULT_GAME_CONFIG,
   });
 
   const unlimitedTime = watch("unlimitedTime");

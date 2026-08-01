@@ -1,3 +1,5 @@
+import { SettingsFormValues } from "../schema";
+
 export const GameSpeeds = {
   slow: "slow",
   normal: "normal",
@@ -12,4 +14,14 @@ export const GAME_SPEED_OPTIONS = [
   { value: GameSpeeds.veryFast, label: "Very Fast" },
 ] as const;
 
+const DEFAULT_GAME_CONFIG: SettingsFormValues = {
+  pointsPerGrain: 10,
+  pointsPerGrass: 10,
+  unlimitedTime: false,
+  timeLimit: 45,
+  gameSpeed: GameSpeeds.normal,
+};
+
 export type GameSpeed = (typeof GameSpeeds)[keyof typeof GameSpeeds];
+
+export { DEFAULT_GAME_CONFIG };
