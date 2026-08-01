@@ -4,16 +4,15 @@ import CustomerForm from "./components/customer-form";
 import GameScreen from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
-import type { Customer, GameOutcome, PlayRecord } from "./types";
+import type { Customer, GameOutcome } from "./types";
 
 type Screen = "form" | "tutorial" | "game" | "result";
 
 export default function CowSoccerGame() {
-  const [screen, setScreen] = useState<Screen>("form");
+  const [screen, setScreen] = useState<Screen>("result");
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [records, setRecords] = useState<PlayRecord[]>([]);
-  const [lastRecord, setLastRecord] = useState<PlayRecord | null>(null);
+  const [win, setWin] = useState(false);
 
   const startTutorial = (info: Customer) => {
     setCustomer(info);
@@ -26,17 +25,8 @@ export default function CowSoccerGame() {
 
   const finishGame = (result: GameOutcome) => {
     if (!customer) return;
-    const record: PlayRecord = {
-      ...customer,
-      score: result.score,
-      result: result.result,
-      playedSeconds: result.playedSeconds,
-      durationConfig: config.duration,
-      playedAt: new Date().toLocaleString("vi-VN"),
-    };
-    // === Điểm nối Drive sau này: thay dòng dưới bằng call API ghi 1 dòng vào file chung ===
-    setRecords((rs) => [record, ...rs]);
-    setLastRecord(record);
+    // === Điểm nối Drive sau này: gọi API ghi 1 dòng (customer + result) vào file chung ===
+    setWin(result.result === "win");
     setScreen("result");
   };
 
@@ -51,8 +41,8 @@ export default function CowSoccerGame() {
       {screen === "game" && (
         <GameScreen config={config} onFinish={finishGame} />
       )}
-      {screen === "result" && lastRecord && (
-        <ResultScreen record={lastRecord} onDone={() => setScreen("form")} />
+      {screen === "result" && (
+        <ResultScreen win={win} onDone={() => setScreen("form")} />
       )}
     </div>
   );

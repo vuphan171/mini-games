@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import type { PlayRecord } from "../types";
+import { Button } from "@/components/ui/button";
 
 interface ResultScreenProps {
-  record: PlayRecord;
+  win: boolean;
   onDone: () => void;
 }
 
-export default function ResultScreen({ record, onDone }: ResultScreenProps) {
+export default function ResultScreen({ win, onDone }: ResultScreenProps) {
   const [left, setLeft] = useState(6);
   useEffect(() => {
     const t = setInterval(() => setLeft((l) => l - 1), 1000);
@@ -16,52 +16,48 @@ export default function ResultScreen({ record, onDone }: ResultScreenProps) {
     if (left <= 0) onDone();
   }, [left, onDone]);
 
-  const win = record.result === "win";
-  const reason =
-    record.result === "lose_obstacle"
-      ? "Ôi không! Bò va phải chướng ngại vật rồi 🧑‍⚖️⚽"
-      : record.result === "lose_timeout"
-        ? "Hết giờ mất rồi, chưa đủ điểm ⏱"
-        : "Bạn đã thu thập đủ thịt bò trong thời gian quy định!";
-
   return (
     <div
-      className="w-full flex items-center justify-center p-6"
+      className="flex min-h-dvh w-full items-center justify-center p-6"
       style={{
-        minHeight: "100vh",
-        background: win ? "linear-gradient(160deg,#f59e0b,#fbbf24)" : "linear-gradient(160deg,#334155,#64748b)",
+        background: win
+          ? "linear-gradient(160deg,#ffd54f,#ffb300)"
+          : "linear-gradient(160deg,#42525c,#7c93a0)",
       }}
     >
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 text-center">
-        <div className="text-7xl mb-3">{win ? "🏆" : "😢"}</div>
-        <h2 className={"text-3xl font-extrabold " + (win ? "text-amber-600" : "text-slate-600")}>
+      <div
+        className="w-full max-w-md rounded-[22px] border-4 p-8 text-center"
+        style={{
+          borderColor: "#21351f",
+          background: "#fff8e7",
+          boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
+        }}
+      >
+        <div className="mb-2 text-7xl">{win ? "🏆" : "😢"}</div>
+        <h2
+          className="text-3xl font-extrabold"
+          style={{ color: win ? "#8a5a00" : "#42525c" }}
+        >
           {win ? "CHIẾN THẮNG!" : "CHƯA THẮNG RỒI!"}
         </h2>
-        <p className="text-gray-500 mt-2">{reason}</p>
 
-        <div className="mt-6 bg-gray-50 rounded-2xl p-5 text-left space-y-2 text-gray-700">
-          <p>
-            <b>Khách:</b> {record.name}
+        {win && (
+          <p className="mt-4 font-semibold text-[#2c7a37]">
+            🎁 Mời bạn đến quầy nhận quà nhé!
           </p>
-          <p>
-            <b>Cửa hàng:</b> {record.store}
-          </p>
-          <p>
-            <b>Điểm số:</b> {record.score}
-          </p>
-          <p>
-            <b>Thời gian chơi:</b> {record.playedSeconds}s
-          </p>
-          <p>
-            <b>Thời điểm:</b> {record.playedAt}
-          </p>
-        </div>
-
-        {win && <p className="mt-4 text-emerald-600 font-semibold">🎁 Mời bạn đến quầy nhận quà nhé!</p>}
-        <p className="mt-5 text-sm text-gray-400">Tự quay về màn hình chính sau {left}s…</p>
-        <button onClick={onDone} className="mt-3 px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold">
+        )}
+        <p className="mt-5 text-sm text-[#7a8a72]">
+          Tự quay về màn hình chính sau {left}s…
+        </p>
+        <Button
+          type="button"
+          variant="game"
+          size="2xl"
+          className="mt-3 w-full"
+          onClick={onDone}
+        >
           Khách tiếp theo →
-        </button>
+        </Button>
       </div>
     </div>
   );
