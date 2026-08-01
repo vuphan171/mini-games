@@ -9,44 +9,55 @@ import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game-v2";
 // dựa vào font metrics — chính xác trên mọi trình duyệt vì đo trên kết quả vẽ thật.
 const glyphOffsetCache = new Map<string, { x: number; y: number }>();
 
+const NO_OFFSET = { x: 0, y: 0 };
+
+// Lỡ có gì bất thường (getContext trả về null, getImageData bị chặn...) thì
+// trả về NO_OFFSET để fillText vẫn vẽ bình thường (chỉ mất phần canh giữa tinh
+// chỉnh), không làm crash cả vòng lặp vẽ game.
 const getGlyphCenterOffset = (font: string, glyph: string) => {
   const cacheKey = `${font}::${glyph}`;
   const cached = glyphOffsetCache.get(cacheKey);
   if (cached) return cached;
 
-  const size = 140;
-  const center = size / 2;
-  const off = document.createElement("canvas");
-  off.width = size;
-  off.height = size;
-  const octx = off.getContext("2d")!;
-  octx.font = font;
-  octx.textAlign = "center";
-  octx.textBaseline = "middle";
-  octx.fillText(glyph, center, center);
+  try {
+    const size = 140;
+    const center = size / 2;
+    const off = document.createElement("canvas");
+    off.width = size;
+    off.height = size;
+    const octx = off.getContext("2d");
+    if (!octx) return NO_OFFSET;
 
-  const { data } = octx.getImageData(0, 0, size, size);
-  let minX = size;
-  let maxX = -1;
-  let minY = size;
-  let maxY = -1;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (data[(y * size + x) * 4 + 3] > 10) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
+    octx.font = font;
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    octx.fillText(glyph, center, center);
+
+    const { data } = octx.getImageData(0, 0, size, size);
+    let minX = size;
+    let maxX = -1;
+    let minY = size;
+    let maxY = -1;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (data[(y * size + x) * 4 + 3] > 10) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
       }
     }
-  }
 
-  const offset =
-    maxX >= minX
-      ? { x: center - (minX + maxX) / 2, y: center - (minY + maxY) / 2 }
-      : { x: 0, y: 0 };
-  glyphOffsetCache.set(cacheKey, offset);
-  return offset;
+    const offset =
+      maxX >= minX
+        ? { x: center - (minX + maxX) / 2, y: center - (minY + maxY) / 2 }
+        : NO_OFFSET;
+    glyphOffsetCache.set(cacheKey, offset);
+    return offset;
+  } catch {
+    return NO_OFFSET;
+  }
 };
 
 const SPEED_MULT: Record<GameV2Config["gameSpeed"], number> = {
