@@ -133,3 +133,15 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .bg-game-gradient {
+    background: linear-gradient(
+      180deg,
+      #7ec9f0 0%,
+      #a5dcb0 22%,
+      #3c9448 40%,
+      #2c7a37 100%
+    );
+  }
+}

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { DEFAULT_CONFIG, type GameConfig } from "../../configs";
-import ConfigPanel from "./components/config-panel";
 import CustomerForm from "./components/customer-form";
 import GameScreen from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
+import TutorialScreen from "./components/tutorial-screen";
 import type { Customer, GameOutcome, PlayRecord } from "./types";
 
-type Screen = "form" | "game" | "result";
+type Screen = "form" | "tutorial" | "game" | "result";
 
 export default function CowSoccerGame() {
   const [screen, setScreen] = useState<Screen>("form");
@@ -14,10 +14,13 @@ export default function CowSoccerGame() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [records, setRecords] = useState<PlayRecord[]>([]);
   const [lastRecord, setLastRecord] = useState<PlayRecord | null>(null);
-  const [showConfig, setShowConfig] = useState(false);
 
-  const startGame = (info: Customer) => {
+  const startTutorial = (info: Customer) => {
     setCustomer(info);
+    setScreen("tutorial");
+  };
+
+  const startGame = () => {
     setScreen("game");
   };
 
@@ -39,11 +42,17 @@ export default function CowSoccerGame() {
 
   return (
     <div className="font-sans">
-      {screen === "form" && <CustomerForm onStart={startGame} onOpenConfig={() => setShowConfig(true)} />}
-      {screen === "game" && <GameScreen config={config} onFinish={finishGame} />}
-      {screen === "result" && lastRecord && <ResultScreen record={lastRecord} onDone={() => setScreen("form")} />}
-      {showConfig && (
-        <ConfigPanel config={config} setConfig={setConfig} records={records} onClose={() => setShowConfig(false)} />
+      {screen === "form" && (
+        <CustomerForm onStart={startTutorial} onOpenConfig={() => {}} />
+      )}
+      {screen === "tutorial" && (
+        <TutorialScreen config={config} onStart={startGame} />
+      )}
+      {screen === "game" && (
+        <GameScreen config={config} onFinish={finishGame} />
+      )}
+      {screen === "result" && lastRecord && (
+        <ResultScreen record={lastRecord} onDone={() => setScreen("form")} />
       )}
     </div>
   );

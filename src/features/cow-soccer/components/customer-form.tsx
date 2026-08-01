@@ -41,13 +41,7 @@ export default function CustomerForm({
   };
 
   return (
-    <div
-      className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6"
-      style={{
-        background:
-          "linear-gradient(180deg,#7ec9f0 0%,#a5dcb0 22%,#3c9448 40%,#2c7a37 100%)",
-      }}
-    >
+    <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
       <button
         type="button"
         onClick={onOpenConfig}
@@ -172,9 +166,10 @@ export default function CustomerForm({
 
           <Button
             type="submit"
-            size="lg"
+            size="2xl"
+            variant="game"
             disabled={!formState.isValid}
-            className="mt-1 h-15 w-full rounded-2xl border-4 border-[#21351f] bg-[#ffb300] text-2xl font-extrabold text-[#4a2f00] shadow-[0_6px_0_#8a5a00] hover:bg-[#ffb300]/90 disabled:border-[#a4ac96] disabled:bg-[#d5d9c8] disabled:text-[#8b937f] disabled:shadow-[0_6px_0_#a4ac96]"
+            className="mt-1 w-full"
           >
             ▶ BẮT ĐẦU CHƠI
           </Button>
