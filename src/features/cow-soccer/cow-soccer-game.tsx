@@ -9,10 +9,10 @@ import type { Customer, GameOutcome } from "./types";
 type Screen = "form" | "tutorial" | "game" | "result";
 
 export default function CowSoccerGame() {
-  const [screen, setScreen] = useState<Screen>("result");
+  const [screen, setScreen] = useState<Screen>("form");
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [win, setWin] = useState(false);
+  const [outcome, setOutcome] = useState<GameOutcome | null>(null);
 
   const startTutorial = (info: Customer) => {
     setCustomer(info);
@@ -26,7 +26,7 @@ export default function CowSoccerGame() {
   const finishGame = (result: GameOutcome) => {
     if (!customer) return;
     // === Điểm nối Drive sau này: gọi API ghi 1 dòng (customer + result) vào file chung ===
-    setWin(result.result === "win");
+    setOutcome(result);
     setScreen("result");
   };
 
@@ -41,8 +41,8 @@ export default function CowSoccerGame() {
       {screen === "game" && (
         <GameScreen config={config} onFinish={finishGame} />
       )}
-      {screen === "result" && (
-        <ResultScreen win={win} onDone={() => setScreen("form")} />
+      {screen === "result" && outcome && (
+        <ResultScreen outcome={outcome} onDone={() => setScreen("form")} />
       )}
     </div>
   );

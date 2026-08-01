@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#1a4d21;}
+a{color:#ffb300;} a:hover{color:#ffd54f;}
+@keyframes cowRun{0%{transform:translateX(0)}100%{transform:translateX(240px)}}
+@keyframes ballKick{0%{transform:translate(0,0) scale(1)}100%{transform:translate(120px,-420px) scale(.55)}}
+@keyframes netShake{0%,100%{transform:rotate(0)}25%{transform:rotate(2deg)}75%{transform:rotate(-2deg)}}
+@keyframes popIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes spinStar{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.3)}100%{transform:rotate(360deg) scale(1)}}
+</style>
+</helmet>
+<div data-screen-label="App" style="font-family:'Be Vietnam Pro',sans-serif;width:100%;min-height:100vh;background:linear-gradient(180deg,#7ec9f0 0%,#a5dcb0 22%,#3c9448 40%,#2c7a37 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 90px,rgba(255,255,255,.05) 90px 180px);pointer-events:none;"></div>
+
+  <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Nhập thông tin" style="position:relative;width:min(540px,92vw);display:flex;flex-direction:column;gap:14px;align-items:center;padding:28px 0;">
+      <div style="text-align:center;display:flex;flex-direction:column;gap:2px;align-items:center;">
+        <div style="font-size:64px;line-height:1;animation:bounce 2.2s ease-in-out infinite;">🐮</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:46px;line-height:1;color:#fff;text-shadow:0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35);letter-spacing:.01em;">SIÊU BÒ ÚC</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;line-height:1.1;color:#ffd54f;text-shadow:0 3px 0 #8a5a00, 0 5px 12px rgba(0,0,0,.3);">⚽ SÚT BÓNG ⚽</div>
+      </div>
+      <div style="width:100%;background:#fff8e7;border:4px solid #21351f;border-radius:22px;box-shadow:0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35);padding:24px 26px;display:flex;flex-direction:column;gap:14px;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;color:#2c7a37;text-align:center;">Nhập thông tin để bắt đầu 🎮</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Tên khách hàng *</label>
+          <input value="{{ formName }}" onChange="{{ onName }}" placeholder="Nguyễn Văn A" style="font-family:'Be Vietnam Pro',sans-serif;font-size:16px;padding:12px 14px;border:3px solid #21351f;border-radius:14px;outline:none;background:#fff;" style-focus="border-color:#2c7a37;box-shadow:0 0 0 3px rgba(60,148,72,.3);">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Email *</label>
+          <input value="{{ formEmail }}" onChange="{{ onEmail }}" placeholder="a@email.com" style="font-family:'Be Vietnam Pro',sans-serif;font-size:16px;padding:12px 14px;border:3px solid {{ emailBorder }};border-radius:14px;outline:none;background:#fff;">
+          <sc-if value="{{ emailError }}" hint-placeholder-val="{{ false }}"><div style="color:#d63031;font-size:13px;font-weight:600;">⚠ Email không hợp lệ</div></sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Số điện thoại *</label>
+          <input value="{{ formPhone }}" onChange="{{ onPhone }}" placeholder="0901234567" style="font-family:'Be Vietnam Pro',sans-serif;font-size:16px;padding:12px 14px;border:3px solid {{ phoneBorder }};border-radius:14px;outline:none;background:#fff;">
+          <sc-if value="{{ phoneError }}" hint-placeholder-val="{{ false }}"><div style="color:#d63031;font-size:13px;font-weight:600;">⚠ Số điện thoại không hợp lệ</div></sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Cửa hàng *</label>
+          <select value="{{ selectedStore }}" onChange="{{ onStore }}" style="font-family:'Be Vietnam Pro',sans-serif;font-size:16px;padding:12px 14px;border:3px solid #21351f;border-radius:14px;outline:none;background:#fff;">
+            <sc-for list="{{ stores }}" as="st" hint-placeholder-count="3">
+              <option value="{{ st }}">{{ st }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <button onClick="{{ startTutorial }}" disabled="{{ startDisabled }}" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;padding:14px;border:4px solid #21351f;border-radius:18px;background:{{ startBg }};color:{{ startColor }};cursor:pointer;min-height:60px;box-shadow:0 6px 0 {{ startShadow }};margin-top:4px;" style-active="transform:translateY(4px);box-shadow:0 2px 0 {{ startShadow }};">▶ BẮT ĐẦU CHƠI</button>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.75);">Admin: thêm <span style="font-family:monospace;">?admin</span> vào URL để mở cài đặt</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isTutorial }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Hướng dẫn" style="position:relative;width:min(600px,94vw);display:flex;flex-direction:column;gap:14px;padding:24px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:36px;color:#fff;text-shadow:0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35);">📖 LUẬT CHƠI</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;background:#ffd54f;color:#8a5a00;border:4px solid #21351f;border-radius:999px;padding:2px 20px;box-shadow:0 4px 0 #21351f;">{{ tutorialLeft }}s</div>
+      </div>
+      <div style="background:#fff8e7;border:4px solid #21351f;border-radius:22px;box-shadow:0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35);padding:22px 26px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:16px;color:#21351f;line-height:1.45;">
+          <div style="display:flex;gap:14px;align-items:center;"><span style="font-size:30px;flex-shrink:0;">👆</span><span>Chạm và kéo <b>trái / phải</b> để điều khiển chú bò. Thả tay — bò dừng ngay!</span></div>
+          <div style="display:flex;gap:14px;align-items:center;"><span style="font-size:30px;flex-shrink:0;">🌾🌿</span><span>Ăn <b>ngũ cốc</b> và <b>cỏ</b> để cộng điểm.</span></div>
+          <div style="display:flex;gap:14px;align-items:center;"><span style="font-size:30px;flex-shrink:0;">💉🦠🧑‍⚖️</span><span>Né <b>vắc-xin, virus, trọng tài</b> — đụng phải là thua ngay!</span></div>
+          <div style="display:flex;gap:14px;align-items:center;"><span style="font-size:30px;flex-shrink:0;">⏱️</span><span>{{ tutorialWinRule }}</span></div>
+        </div>
+        <div style="background:#e9f5db;border:3px solid #2c7a37;border-radius:16px;padding:14px 18px;">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:#2c7a37;margin-bottom:6px;">🎁 MỐC ĐIỂM ĐỔI QUÀ</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 18px;font-size:15px;color:#21351f;">
+            <b>0 – 49 điểm</b><span>Sticker Siêu Bò Úc</span>
+            <b>50 – 99 điểm</b><span>Móc khóa bò</span>
+            <b>100 – 149 điểm</b><span>Ly sứ Siêu Bò</span>
+            <b>150+ điểm</b><span>Gấu bông Bò Úc</span>
+          </div>
+          <div style="font-size:12px;color:#7a8a72;margin-top:6px;">(Bảng quà minh họa — PG đối chiếu điểm và phát quà thủ công)</div>
+        </div>
+      </div>
+      <button onClick="{{ startGame }}" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;padding:14px;border:4px solid #21351f;border-radius:18px;background:#ffb300;color:#4a2f00;cursor:pointer;min-height:58px;box-shadow:0 6px 0 #8a5a00;" style-active="transform:translateY(4px);box-shadow:0 2px 0 #8a5a00;">⏩ BỎ QUA → CHƠI NGAY</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isGame }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Gameplay" style="position:relative;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;">
+      <canvas ref="{{ canvasRef }}" width="720" height="1080" style="height:100vh;max-width:100vw;touch-action:none;display:block;"></canvas>
+      <div style="position:absolute;top:14px;left:0;right:0;display:flex;justify-content:center;gap:14px;pointer-events:none;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;background:#fff8e7;color:#2c7a37;border:4px solid #21351f;border-radius:999px;padding:2px 24px;box-shadow:0 4px 0 #21351f;">⭐ {{ score }}</div>
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;background:#ffd54f;color:#8a5a00;border:4px solid #21351f;border-radius:999px;padding:2px 24px;box-shadow:0 4px 0 #21351f;">{{ hudTime }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isWinAnim }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Animation thắng" style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#7ec9f0 0%,#3c9448 55%,#2c7a37 100%);">
+      <div style="position:absolute;top:8vh;left:50%;transform:translateX(-50%);width:320px;height:170px;border:10px solid #fff;border-bottom:none;border-radius:10px 10px 0 0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 2px,transparent 2px 18px),repeating-linear-gradient(-45deg,rgba(255,255,255,.4) 0 2px,transparent 2px 18px);animation:netShake .5s ease 1.5s 2;"></div>
+      <div style="position:absolute;bottom:22vh;left:calc(50% - 220px);font-size:96px;animation:cowRun 1.2s ease-out forwards;">🐮</div>
+      <div style="position:absolute;bottom:20vh;left:calc(50% + 40px);font-size:64px;animation:ballKick 1s cubic-bezier(.3,.8,.5,1) 1.1s forwards;">⚽</div>
+      <div style="position:absolute;top:36vh;left:0;right:0;text-align:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:72px;color:#ffd54f;text-shadow:0 4px 0 #8a5a00, 0 8px 24px rgba(0,0,0,.4);opacity:0;animation:popIn .45s ease 2s forwards;">VÀOOO! 🎉</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Kết quả" style="position:relative;width:min(500px,92vw);display:flex;flex-direction:column;gap:16px;align-items:center;padding:28px 0;animation:popIn .4s ease;">
+      <div style="font-size:84px;line-height:1;animation:spinStar 1.2s ease;">{{ resultEmoji }}</div>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:64px;line-height:1;color:#fff;text-shadow:0 4px 0 {{ resultShadow }}, 0 8px 20px rgba(0,0,0,.35);">{{ resultLabel }}</div>
+      <sc-if value="{{ resultWin }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff8e7;border:4px solid #21351f;border-radius:22px;box-shadow:0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35);padding:20px 40px;display:flex;flex-direction:column;gap:4px;align-items:center;">
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;color:#7a8a72;letter-spacing:.05em;">ĐIỂM ĐẠT ĐƯỢC</div>
+          <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:80px;color:#2c7a37;line-height:1;">{{ resultScore }}</div>
+          <div style="font-size:14px;color:#7a8a72;">Đưa màn hình này cho PG để nhận quà 🎁</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ offlineError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#ffe1e0;border:3px solid #d63031;color:#d63031;font-weight:700;border-radius:14px;padding:10px 20px;font-size:15px;">⚠ Mất kết nối mạng — chưa lưu được dữ liệu</div>
+      </sc-if>
+      <button onClick="{{ nextTurn }}" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;padding:14px 44px;border:4px solid #21351f;border-radius:18px;background:#ffb300;color:#4a2f00;cursor:pointer;min-height:60px;box-shadow:0 6px 0 #8a5a00;" style-active="transform:translateY(4px);box-shadow:0 2px 0 #8a5a00;">LƯỢT TIẾP THEO ({{ resultCountdown }}s)</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Setting" style="position:relative;width:min(780px,96vw);max-height:94vh;overflow:auto;background:#fff8e7;border:4px solid #21351f;border-radius:22px;box-shadow:0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35);padding:28px 32px;display:flex;flex-direction:column;gap:20px;margin:24px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;color:#2c7a37;">⚙️ CÀI ĐẶT (ADMIN)</div>
+        <button onClick="{{ exitAdmin }}" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;padding:9px 22px;border:3px solid #21351f;border-radius:12px;background:#fff;color:#21351f;cursor:pointer;box-shadow:0 4px 0 #21351f;" style-active="transform:translateY(3px);box-shadow:0 1px 0 #21351f;">Thoát</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Điểm ngũ cốc (pointsPerGrain)</label>
+          <input type="number" value="{{ cfgGrain }}" onChange="{{ onCfgGrain }}" style="font-size:16px;padding:10px 14px;border:3px solid #21351f;border-radius:12px;outline:none;background:#fff;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Điểm cỏ (pointsPerGrass)</label>
+          <input type="number" value="{{ cfgGrass }}" onChange="{{ onCfgGrass }}" style="font-size:16px;padding:10px 14px;border:3px solid #21351f;border-radius:12px;outline:none;background:#fff;">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button onClick="{{ toggleUnlimited }}" style="width:58px;height:32px;border-radius:999px;border:3px solid #21351f;cursor:pointer;background:{{ toggleBg }};position:relative;flex-shrink:0;padding:0;">
+          <span style="position:absolute;top:2px;left:{{ toggleKnobLeft }};width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #21351f;box-sizing:border-box;transition:left .15s;"></span>
+        </button>
+        <label style="font-weight:600;font-size:15px;color:#21351f;">Không giới hạn thời gian chơi</label>
+      </div>
+      <sc-if value="{{ cfgLimited }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:5px;max-width:300px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Thời gian mỗi lượt (giây) *</label>
+          <input type="number" value="{{ cfgTimeLimit }}" onChange="{{ onCfgTimeLimit }}" style="font-size:16px;padding:10px 14px;border:3px solid #21351f;border-radius:12px;outline:none;background:#fff;">
+        </div>
+      </sc-if>
+      <sc-if value="{{ cfgUnlimited }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:5px;max-width:300px;">
+          <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Số điểm để chiến thắng *</label>
+          <input type="number" value="{{ cfgWinScore }}" onChange="{{ onCfgWinScore }}" style="font-size:16px;padding:10px 14px;border:3px solid {{ winScoreBorder }};border-radius:12px;outline:none;background:#fff;">
+          <sc-if value="{{ winScoreError }}" hint-placeholder-val="{{ false }}"><div style="color:#d63031;font-size:13px;font-weight:600;">⚠ Phải lớn hơn tổng điểm ngũ cốc + cỏ ({{ cfgSumHint }})</div></sc-if>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:5px;max-width:300px;">
+        <label style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:#21351f;">Tốc độ game</label>
+        <select value="{{ cfgSpeed }}" onChange="{{ onCfgSpeed }}" style="font-size:16px;padding:10px 14px;border:3px solid #21351f;border-radius:12px;outline:none;background:#fff;">
+          <option value="Slow">Slow</option>
+          <option value="Normal">Normal</option>
+          <option value="Fast">Fast</option>
+          <option value="Very Fast">Very Fast</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <button onClick="{{ saveConfig }}" disabled="{{ saveDisabled }}" style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;padding:11px 32px;border:4px solid #21351f;border-radius:14px;background:{{ saveBg }};color:{{ saveColor }};cursor:pointer;box-shadow:0 5px 0 {{ saveShadow }};" style-active="transform:translateY(3px);box-shadow:0 2px 0 {{ saveShadow }};">💾 LƯU CÀI ĐẶT</button>
+        <sc-if value="{{ savedFlash }}" hint-placeholder-val="{{ false }}"><span style="color:#2c7a37;font-weight:700;">✓ Đã lưu</span></sc-if>
+      </div>
+      <div style="border-top:3px dashed #c9d3b8;padding-top:16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:#2c7a37;">📋 DỮ LIỆU LƯỢT CHƠI — {{ selectedStore }}</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <select value="{{ selectedStore }}" onChange="{{ onStore }}" style="font-size:15px;padding:9px 12px;border:3px solid #21351f;border-radius:12px;background:#fff;outline:none;">
+            <sc-for list="{{ stores }}" as="st" hint-placeholder-count="3">
+              <option value="{{ st }}">{{ st }}</option>
+            </sc-for>
+          </select>
+          <input type="date" value="{{ gridDate }}" onChange="{{ onGridDate }}" style="font-size:15px;padding:8px 12px;border:3px solid #21351f;border-radius:12px;outline:none;background:#fff;">
+          <button onClick="{{ gridAll }}" style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:9px 18px;border:3px solid {{ gridAllBorder }};border-radius:12px;background:{{ gridAllBg }};color:#21351f;cursor:pointer;">Tất cả ngày</button>
+        </div>
+        <div style="overflow:auto;border:3px solid #21351f;border-radius:14px;background:#fff;">
+          <div style="display:grid;grid-template-columns:1.3fr 1.5fr 1.1fr .6fr .8fr .7fr 1.2fr;min-width:720px;font-size:13px;">
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Tên khách</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Email</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">SĐT</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Điểm</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Kết quả</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Chơi (s)</div>
+            <div style="font-weight:700;padding:10px 12px;background:#e9f5db;color:#2c7a37;">Ngày giờ</div>
+            <sc-for list="{{ gridCells }}" as="c" hint-placeholder-count="7">
+              <div style="padding:9px 12px;border-top:1px solid #eef0e4;color:#21351f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ gridEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px;text-align:center;color:#a4b09a;font-size:14px;">Chưa có dữ liệu cho bộ lọc này</div>
+          </sc-if>
+        </div>
+        <div style="font-size:12px;color:#a4b09a;">Giả lập Google Sheet — mỗi cửa hàng một sheet, lưu tại trình duyệt (localStorage). View-only.</div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const STORES = ['Cửa hàng Quận 1','Cửa hàng Quận 3','Cửa hàng Quận 7','Cửa hàng Thủ Đức','Cửa hàng Hà Nội'];
+const DEFAULT_CFG = { pointsPerGrain: 10, pointsPerGrass: 5, unlimitedTime: false, timeLimit: 45, winningScore: 100, gameSpeed: 'Normal' };
+const SPEED_MULT = { 'Slow': .7, 'Normal': 1, 'Fast': 1.4, 'Very Fast': 1.8 };
+const CFG_KEY = 'sbu_config', REC_KEY = 'sbu_records';
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtDateTime(d){ const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()); }
+
+class Component extends DCLogic {
+  state = {
+    screen: 'form',
+    formName: '', formEmail: '', formPhone: '',
+    selectedStore: STORES[STORES.length-1],
+    emailTouched: false, phoneTouched: false,
+    tutorialLeft: 30,
+    score: 0, timeLeft: 0,
+    resultWin: false, resultScore: 0, resultCountdown: 5, offlineError: false,
+    cfg: {...DEFAULT_CFG}, cfgDraft: {...DEFAULT_CFG}, savedFlash: false,
+    gridDate: todayISO(), gridAllDates: false,
+  };
+  canvasRef = React.createRef();
+
+  componentDidMount() {
+    try { const s = JSON.parse(localStorage.getItem(CFG_KEY)); if (s) this.setState({cfg:{...DEFAULT_CFG,...s}, cfgDraft:{...DEFAULT_CFG,...s}}); } catch(e){}
+    if (new URLSearchParams(location.search).has('admin')) this.setState({screen:'admin'});
+  }
+  componentWillUnmount(){ this.stopLoops(); }
+  stopLoops(){ cancelAnimationFrame(this.raf); clearInterval(this.tutTimer); clearInterval(this.resTimer); clearTimeout(this.animTimer); }
+
+  loadRecords(){ try { return JSON.parse(localStorage.getItem(REC_KEY)) || {}; } catch(e){ return {}; } }
+  saveRecord(rec){
+    if (!navigator.onLine) { this.setState({offlineError:true}); return; }
+    const all = this.loadRecords();
+    (all[rec.store] = all[rec.store] || []).push(rec);
+    localStorage.setItem(REC_KEY, JSON.stringify(all));
+  }
+
+  startGame = () => {
+    clearInterval(this.tutTimer);
+    const cfg = this.state.cfg;
+    this.game = {
+      cowX: 360, targetX: 360, dragging: false,
+      entities: [], score: 0,
+      startTime: performance.now(), lastSpawnItem: 0, lastSpawnObs: 0, lastT: performance.now(),
+      speed: SPEED_MULT[cfg.gameSpeed] || 1, over: false,
+    };
+    this.setState({screen:'game', score:0, timeLeft: cfg.unlimitedTime ? 0 : cfg.timeLimit, offlineError:false}, () => {
+      const cv = this.canvasRef.current;
+      if (!cv) return;
+      cv.onpointerdown = e => { this.game.dragging = true; cv.setPointerCapture(e.pointerId); this.setTarget(cv, e); };
+      cv.onpointermove = e => { if (this.game.dragging) this.setTarget(cv, e); };
+      cv.onpointerup = cv.onpointercancel = () => { this.game.dragging = false; this.game.targetX = this.game.cowX; };
+      this.raf = requestAnimationFrame(this.tick);
+    });
+  };
+  setTarget(cv, e){ const r = cv.getBoundingClientRect(); this.game.targetX = (e.clientX - r.left) / r.width * 720; }
+
+  tick = (now) => {
+    const g = this.game; if (!g || g.over) return;
+    const cfg = this.state.cfg;
+    const dt = Math.min((now - g.lastT)/1000, .05); g.lastT = now;
+    const sp = g.speed;
+    const maxV = 900 * sp * dt;
+    const dx = g.targetX - g.cowX;
+    g.cowX += Math.abs(dx) <= maxV ? dx : Math.sign(dx)*maxV;
+    g.cowX = Math.max(60, Math.min(660, g.cowX));
+    if (now - g.lastSpawnItem > 750/sp) { g.lastSpawnItem = now; g.entities.push({kind:'item', type: Math.random()<.5?'grain':'grass', x: 60+Math.random()*600, y:-40}); }
+    if (now - g.lastSpawnObs > 1600/sp) { g.lastSpawnObs = now; const t=['vaccine','virus','ref'][Math.floor(Math.random()*3)]; g.entities.push({kind:'obs', type:t, x: 60+Math.random()*600, y:-40}); }
+    const cowY = 940, fall = 260*sp*dt;
+    let gained = 0;
+    for (const en of g.entities) {
+      en.y += fall;
+      if (!en.hit && Math.abs(en.x-g.cowX)<58 && Math.abs(en.y-cowY)<62) {
+        if (en.kind==='item') { en.hit=true; gained += en.type==='grain'? +cfg.pointsPerGrain : +cfg.pointsPerGrass; }
+        else return this.endRound(false);
+      }
+    }
+    g.entities = g.entities.filter(en => !en.hit && en.y < 1140);
+    if (gained) { g.score += gained; this.setState({score:g.score});
+      if (cfg.unlimitedTime && g.score >= +cfg.winningScore) return this.endRound(true);
+    }
+    const elapsed = (now - g.startTime)/1000;
+    if (!cfg.unlimitedTime) {
+      const left = Math.max(0, Math.ceil(cfg.timeLimit - elapsed));
+      if (left !== this.state.timeLeft) this.setState({timeLeft:left});
+      if (elapsed >= cfg.timeLimit) return this.endRound(true);
+    } else {
+      const t = Math.floor(elapsed);
+      if (t !== this.state.timeLeft) this.setState({timeLeft:t});
+    }
+    this.draw();
+    this.raf = requestAnimationFrame(this.tick);
+  };
+
+  draw(){
+    const cv = this.canvasRef.current; if (!cv) return;
+    const ctx = cv.getContext('2d'), g = this.game;
+    for (let i=0;i<9;i++){ ctx.fillStyle = i%2? '#3c9448':'#46a552'; ctx.fillRect(0,i*120,720,120); }
+    ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=4;
+    ctx.strokeRect(30,30,660,1020);
+    ctx.beginPath(); ctx.arc(360,540,90,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(30,540); ctx.lineTo(690,540); ctx.stroke();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    for (const en of g.entities){
+      ctx.font='52px serif';
+      ctx.fillText(en.kind==='item' ? (en.type==='grain'?'🌾':'🌿') : (en.type==='vaccine'?'💉':en.type==='virus'?'🦠':'🧑‍⚖️'), en.x, en.y);
+    }
+    ctx.font='84px serif'; ctx.fillText('🐮', g.cowX, 940);
+  }
+
+  endRound(win){
+    const g = this.game; g.over = true; this.stopLoops();
+    const playTime = Math.round((performance.now()-g.startTime)/1000);
+    this.saveRecord({
+      name: this.state.formName.trim(), email: this.state.formEmail.trim(), phone: this.state.formPhone.trim(),
+      store: this.state.selectedStore, score: g.score, result: win ? 'Thắng' : 'Thua',
+      playTime, datetime: fmtDateTime(new Date()),
+    });
+    this.setState({resultWin:win, resultScore:g.score});
+    if (win) {
+      this.setState({screen:'winAnim'});
+      this.animTimer = setTimeout(()=>this.showResult(), 3000);
+    } else this.showResult();
+  }
+  showResult(){
+    this.setState({screen:'result', resultCountdown:5});
+    this.resTimer = setInterval(()=>{
+      const c = this.state.resultCountdown - 1;
+      if (c <= 0) this.nextTurn(); else this.setState({resultCountdown:c});
+    }, 1000);
+  }
+  nextTurn = () => {
+    this.stopLoops();
+    this.setState({screen:'form', formName:'', formEmail:'', formPhone:'', emailTouched:false, phoneTouched:false, offlineError:false});
+  };
+
+  startTutorial = () => {
+    this.setState({screen:'tutorial', tutorialLeft:30});
+    this.tutTimer = setInterval(()=>{
+      const t = this.state.tutorialLeft - 1;
+      if (t <= 0) this.startGame(); else this.setState({tutorialLeft:t});
+    }, 1000);
+  };
+
+  renderVals() {
+    const s = this.state, cfg = s.cfg, d = s.cfgDraft;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.formEmail.trim());
+    const phoneOk = /^(0|\+84)[35789]\d{8}$/.test(s.formPhone.trim().replace(/\s/g,''));
+    const emailError = s.emailTouched && s.formEmail.length>0 && !emailOk;
+    const phoneError = s.phoneTouched && s.formPhone.length>0 && !phoneOk;
+    const formValid = s.formName.trim().length>0 && emailOk && phoneOk && !!s.selectedStore;
+    const winScoreOk = !d.unlimitedTime || (+d.winningScore > (+d.pointsPerGrain + +d.pointsPerGrass));
+    const timeOk = d.unlimitedTime || (+d.timeLimit > 0);
+    const saveOk = winScoreOk && timeOk;
+    const recs = (this.loadRecords()[s.selectedStore] || []).filter(r => {
+      if (s.gridAllDates) return true;
+      const [dd,mm,yy] = r.datetime.split(' ')[0].split('/');
+      return (yy+'-'+mm+'-'+dd) === s.gridDate;
+    });
+    const gridCells = [];
+    for (const r of recs.slice().reverse()) gridCells.push(r.name, r.email, r.phone, String(r.score), r.result, String(r.playTime), r.datetime);
+    const setDraft = (k) => (e) => this.setState({cfgDraft:{...this.state.cfgDraft, [k]: e.target ? e.target.value : e}});
+    return {
+      isForm: s.screen==='form', isTutorial: s.screen==='tutorial', isGame: s.screen==='game',
+      isWinAnim: s.screen==='winAnim', isResult: s.screen==='result', isAdmin: s.screen==='admin',
+      canvasRef: this.canvasRef,
+      formName: s.formName, formEmail: s.formEmail, formPhone: s.formPhone,
+      onName: e=>this.setState({formName:e.target.value}),
+      onEmail: e=>this.setState({formEmail:e.target.value, emailTouched:true}),
+      onPhone: e=>this.setState({formPhone:e.target.value, phoneTouched:true}),
+      emailError, phoneError,
+      emailBorder: emailError? '#d63031':'#21351f', phoneBorder: phoneError? '#d63031':'#21351f',
+      stores: STORES, selectedStore: s.selectedStore,
+      onStore: e=>this.setState({selectedStore:e.target.value}),
+      startDisabled: !formValid,
+      startBg: formValid? '#ffb300':'#d5d9c8', startColor: formValid? '#4a2f00':'#8b937f', startShadow: formValid? '#8a5a00':'#a4ac96',
+      startTutorial: this.startTutorial,
+      tutorialLeft: s.tutorialLeft, startGame: this.startGame,
+      tutorialWinRule: cfg.unlimitedTime
+        ? ('Đạt ' + cfg.winningScore + ' điểm để chiến thắng — không giới hạn thời gian!')
+        : ('Sống sót hết ' + cfg.timeLimit + ' giây mà không đụng chướng ngại vật là THẮNG!'),
+      score: s.score,
+      hudTime: cfg.unlimitedTime ? ('🎯 ' + s.score + '/' + cfg.winningScore) : ('⏱ ' + s.timeLeft + 's'),
+      resultWin: s.resultWin, resultScore: s.resultScore, resultCountdown: s.resultCountdown,
+      resultEmoji: s.resultWin? '🏆':'😵', resultLabel: s.resultWin? 'THẮNG!':'THUA RỒI!',
+      resultShadow: s.resultWin? '#1a4d21':'#8b1e1e',
+      offlineError: s.offlineError, nextTurn: this.nextTurn,
+      exitAdmin: ()=>{ history.replaceState(null,'',location.pathname); this.setState({screen:'form'}); },
+      cfgGrain: d.pointsPerGrain, cfgGrass: d.pointsPerGrass, cfgTimeLimit: d.timeLimit, cfgWinScore: d.winningScore, cfgSpeed: d.gameSpeed,
+      onCfgGrain: setDraft('pointsPerGrain'), onCfgGrass: setDraft('pointsPerGrass'),
+      onCfgTimeLimit: setDraft('timeLimit'), onCfgWinScore: setDraft('winningScore'), onCfgSpeed: setDraft('gameSpeed'),
+      cfgLimited: !d.unlimitedTime, cfgUnlimited: !!d.unlimitedTime,
+      toggleUnlimited: ()=>this.setState({cfgDraft:{...d, unlimitedTime: !d.unlimitedTime}}),
+      toggleBg: d.unlimitedTime? '#3c9448':'#d5d9c8', toggleKnobLeft: d.unlimitedTime? '27px':'2px',
+      winScoreError: !winScoreOk, winScoreBorder: winScoreOk? '#21351f':'#d63031',
+      cfgSumHint: (+d.pointsPerGrain) + (+d.pointsPerGrass),
+      saveDisabled: !saveOk,
+      saveBg: saveOk? '#3c9448':'#d5d9c8', saveColor: saveOk? '#fff':'#8b937f', saveShadow: saveOk? '#1a4d21':'#a4ac96',
+      savedFlash: s.savedFlash,
+      saveConfig: ()=>{ const clean = {...d, pointsPerGrain:+d.pointsPerGrain, pointsPerGrass:+d.pointsPerGrass, timeLimit:+d.timeLimit, winningScore:+d.winningScore};
+        localStorage.setItem(CFG_KEY, JSON.stringify(clean));
+        this.setState({cfg:clean, savedFlash:true}); clearTimeout(this.flashT); this.flashT=setTimeout(()=>this.setState({savedFlash:false}),2000); },
+      gridDate: s.gridDate, onGridDate: e=>this.setState({gridDate:e.target.value, gridAllDates:false}),
+      gridAll: ()=>this.setState({gridAllDates:!s.gridAllDates}),
+      gridAllBorder: s.gridAllDates? '#3c9448':'#21351f', gridAllBg: s.gridAllDates? '#e9f5db':'#fff',
+      gridCells, gridEmpty: gridCells.length===0,
+    };
+  }
+}
+</script>
+</body>
+</html>

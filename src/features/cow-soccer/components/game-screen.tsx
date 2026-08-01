@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { BEEF_POINT, COW_R, ICONS, RADII, SPEED_PRESETS, type GameConfig, type ItemType } from "../../../configs";
 import { sfx } from "../../../lib/audio";
-import { clamp, fmtTime, rand } from "../../../lib/utils";
+import { clamp, rand } from "../../../lib/utils";
 import type { GameOutcome, GameResultKind } from "../types";
 
 interface GameScreenProps {
@@ -273,8 +273,8 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
 
   return (
     <div
-      className="w-full flex flex-col select-none"
-      style={{ height: "100vh", background: "#064e3b", touchAction: "none", overflow: "hidden" }}
+      className="bg-game-gradient w-full flex flex-col select-none"
+      style={{ height: "100vh", touchAction: "none", overflow: "hidden" }}
     >
       {/* Sân cỏ cuộn dọc, full màn hình */}
       <div
@@ -284,7 +284,7 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
           flex: 1,
           minHeight: 0,
           overflow: "hidden",
-          background: "repeating-linear-gradient(180deg,#3aa843 0,#3aa843 120px,#2f9038 120px,#2f9038 240px)",
+          background: "repeating-linear-gradient(180deg,#3c9448 0,#3c9448 120px,#46a552 120px,#46a552 240px)",
           backgroundPositionY: st ? st.offset % 240 : 0,
         }}
         onTouchStart={onDown}
@@ -357,25 +357,29 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
           </div>
         )}
 
-        {/* HUD nổi trên sân, giống video: thịt bên trái, đồng hồ bên phải */}
-        <div className="absolute flex items-center justify-between" style={{ top: 12, left: 12, right: 12 }}>
+        {/* HUD nổi trên sân, căn giữa như game.html */}
+        <div className="absolute flex items-center justify-center gap-3.5" style={{ top: 14, left: 14, right: 14 }}>
           <div
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-xl font-extrabold"
-            style={{ background: "rgba(255,255,255,0.95)", color: "#b91c1c", boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }}
-          >
-            <img src={ICONS.beef} alt="beef" width={51} height={32} />
-            {st ? st.score : 0}
-            <span className="text-gray-400 text-base font-bold">/{config.winScore}</span>
-          </div>
-          <div
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-xl font-extrabold"
+            className="flex items-center gap-1.5 rounded-full border-4 py-1 pr-5 pl-2 text-2xl font-extrabold"
             style={{
-              background: "rgba(255,255,255,0.95)",
-              color: st && st.timeLeft < 10 ? "#dc2626" : "#065f46",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+              borderColor: "#21351f",
+              background: "#fff8e7",
+              color: "#2c7a37",
+              boxShadow: "0 4px 0 #21351f",
             }}
           >
-            ⏱ {st ? fmtTime(st.timeLeft) : fmtTime(config.duration)}
+            <img src={ICONS.beef} alt="beef" width={40} height={25} />
+            {st ? st.score : 0}
+          </div>
+          <div
+            className="rounded-full border-4 px-5 py-1 text-2xl font-extrabold"
+            style={
+              st && st.timeLeft < 10
+                ? { borderColor: "#d63031", background: "#ffe1e0", color: "#d63031", boxShadow: "0 4px 0 #b0201f" }
+                : { borderColor: "#21351f", background: "#ffd54f", color: "#8a5a00", boxShadow: "0 4px 0 #21351f" }
+            }
+          >
+            ⏱ {Math.max(0, Math.ceil(st ? st.timeLeft : config.duration))}s
           </div>
         </div>
 
@@ -386,13 +390,29 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
             style={{ inset: 0, background: "rgba(0,0,0,0.55)" }}
           >
             {!ready ? (
-              <div className="text-3xl font-bold">Đang chuẩn bị sân…</div>
+              <div
+                className="text-3xl font-extrabold"
+                style={{ textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)" }}
+              >
+                Đang chuẩn bị sân…
+              </div>
             ) : (
               <>
-                <div className="text-8xl font-extrabold" key={countdown}>
+                <div
+                  className="text-9xl leading-none font-extrabold"
+                  style={{
+                    color: "#ffd54f",
+                    textShadow: "0 4px 0 #8a5a00, 0 8px 20px rgba(0,0,0,.4)",
+                    animation: "pop-in .3s ease",
+                  }}
+                  key={countdown}
+                >
                   {countdown}
                 </div>
-                <p className="mt-6 text-xl px-8 text-center">
+                <p
+                  className="mt-6 px-8 text-center text-xl font-semibold"
+                  style={{ textShadow: "0 2px 4px rgba(0,0,0,.4)" }}
+                >
                   Kéo ngang để điều khiển bò 🐄
                   <br />
                   Ăn <img src={ICONS.beef} alt="beef" width={45} height={29} style={{ display: "inline", verticalAlign: "middle" }} /> lấy
