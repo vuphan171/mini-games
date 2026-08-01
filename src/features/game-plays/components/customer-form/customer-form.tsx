@@ -12,20 +12,27 @@ import {
 } from "@/components/ui/select";
 import { STORES } from "@/configs";
 import { ensureAudioContext } from "@/lib/audio";
-import { customerFormSchema, type CustomerFormValues } from "../schema";
-import type { Customer } from "../types";
+import { useCustomerSchema, TCustomerSchema } from "./schema";
+import type { Customer } from "../../types";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-interface CustomerFormProps {
+type Props = {
   onStart: (info: Customer) => void;
   onOpenConfig: () => void;
-}
+};
 
-export default function CustomerForm({
-  onStart,
-  onOpenConfig,
-}: CustomerFormProps) {
-  const { control, handleSubmit, formState } = useForm<CustomerFormValues>({
-    resolver: zodResolver(customerFormSchema),
+const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
+  const customerSchema = useCustomerSchema();
+
+  const { control, handleSubmit, formState } = useForm<TCustomerSchema>({
+    resolver: zodResolver(customerSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -35,21 +42,38 @@ export default function CustomerForm({
     },
   });
 
-  const onSubmit = (data: CustomerFormValues) => {
+  const onSubmit = (data: TCustomerSchema) => {
     ensureAudioContext();
     onStart(data);
   };
 
   return (
     <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
-      <button
-        type="button"
-        onClick={onOpenConfig}
-        className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
-        aria-label="Cài đặt"
-      >
-        ⚙️
-      </button>
+      <Dialog>
+        <form>
+          <DialogTrigger>
+            <button
+              type="button"
+              onClick={onOpenConfig}
+              className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
+              aria-label="Cài đặt"
+            >
+              ⚙️
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-sm px-5 py-10">
+            <DialogHeader>
+              <DialogTitle className="text-center text-[#2c7a37] text-3xl font-semibold">
+                NHẬP MÃ PIN
+              </DialogTitle>
+            </DialogHeader>
+            <Input></Input>
+            <DialogClose>
+              <Button>Cancel</Button>
+            </DialogClose>
+          </DialogContent>
+        </form>
+      </Dialog>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -177,4 +201,6 @@ export default function CustomerForm({
       </form>
     </div>
   );
-}
+};
+
+export default CustomerForm;
