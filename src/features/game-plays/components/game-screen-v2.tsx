@@ -4,6 +4,51 @@ import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game-v2";
 
 // Bản sao 1:1 logic + canvas render từ docs/game.html (bản gốc "Siêu Bò Úc Sút Bóng")
 
+// TextMetrics.actualBoundingBox* không đáng tin cậy với emoji màu/ZWJ trên Safari
+// (thường trả về 0), nên canh giữa bằng cách quét pixel thực tế đã render, thay vì
+// dựa vào font metrics — chính xác trên mọi trình duyệt vì đo trên kết quả vẽ thật.
+const glyphOffsetCache = new Map<string, { x: number; y: number }>();
+
+const getGlyphCenterOffset = (font: string, glyph: string) => {
+  const cacheKey = `${font}::${glyph}`;
+  const cached = glyphOffsetCache.get(cacheKey);
+  if (cached) return cached;
+
+  const size = 140;
+  const center = size / 2;
+  const off = document.createElement("canvas");
+  off.width = size;
+  off.height = size;
+  const octx = off.getContext("2d")!;
+  octx.font = font;
+  octx.textAlign = "center";
+  octx.textBaseline = "middle";
+  octx.fillText(glyph, center, center);
+
+  const { data } = octx.getImageData(0, 0, size, size);
+  let minX = size;
+  let maxX = -1;
+  let minY = size;
+  let maxY = -1;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (data[(y * size + x) * 4 + 3] > 10) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  const offset =
+    maxX >= minX
+      ? { x: center - (minX + maxX) / 2, y: center - (minY + maxY) / 2 }
+      : { x: 0, y: 0 };
+  glyphOffsetCache.set(cacheKey, offset);
+  return offset;
+};
+
 const SPEED_MULT: Record<GameV2Config["gameSpeed"], number> = {
   Slow: 0.7,
   Normal: 1,
@@ -156,7 +201,8 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
         ctx.stroke();
 
         ctx.fillStyle = "#000";
-        ctx.fillText(glyph, en.x, en.y);
+        const offset = getGlyphCenterOffset(ctx.font, glyph);
+        ctx.fillText(glyph, en.x + offset.x, en.y + offset.y);
       }
       ctx.font = "84px serif";
       ctx.fillText("🐮", g.cowX, 940);
