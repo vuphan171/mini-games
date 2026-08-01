@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { DEFAULT_CONFIG, type GameConfig } from "../../configs";
+import type { Customer, GameOutcome } from "./types";
+import { GameScreen, GAME_SCREENS } from "./configs";
 import CustomerForm from "./components/customer-form";
 import PlayGame from "./components/game-screen-v2";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
-import type { Customer, GameOutcome } from "./types";
-import { GameScreen, GAME_SCREENS } from "./configs";
 
 const MiniGames = () => {
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);

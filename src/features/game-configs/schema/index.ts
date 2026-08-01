@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GAME_SPEED_OPTIONS, type GameSpeed } from "./configs";
+import { GAME_SPEED_OPTIONS, type GameSpeed } from "../configs";
 
 const gameSpeedValues = GAME_SPEED_OPTIONS.map((o) => o.value) as [
   GameSpeed,

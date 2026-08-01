@@ -174,11 +174,6 @@ export default function CustomerForm({
             ▶ BẮT ĐẦU CHƠI
           </Button>
         </div>
-
-        <p className="text-xs text-white/75">
-          Admin: thêm <span className="font-mono">?admin</span> vào URL để mở
-          cài đặt
-        </p>
       </form>
     </div>
   );

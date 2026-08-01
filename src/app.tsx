@@ -1,10 +1,12 @@
 import { Route, Routes } from "react-router-dom";
-import CowSoccerGame from "./features/cow-soccer/cow-soccer-game.tsx";
+import GamePlays from "./features/game-plays";
+import GameConfigs from "./features/game-configs";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<CowSoccerGame />} />
+      <Route path="/" element={<GamePlays />} />
+      <Route path="/configs" element={<GameConfigs />} />
     </Routes>
   );
 }
