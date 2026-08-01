@@ -24,8 +24,8 @@ const AdminConfigs = () => {
   const { control, handleSubmit, watch } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      pointsPerGrain: 0,
-      pointsPerGrass: 0,
+      pointsPerGrain: 10,
+      pointsPerGrass: 10,
       unlimitedTime: false,
       timeLimit: 45,
       gameSpeed: GameSpeeds.normal,

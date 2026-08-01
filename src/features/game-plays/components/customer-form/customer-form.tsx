@@ -14,14 +14,7 @@ import { STORES } from "@/configs";
 import { ensureAudioContext } from "@/lib/audio";
 import { useCustomerSchema, TCustomerSchema } from "./schema";
 import type { Customer } from "../../types";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import ConfigDialog from "./components/config-dialog";
 
 type Props = {
   onStart: (info: Customer) => void;
@@ -49,31 +42,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
 
   return (
     <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
-      <Dialog>
-        <form>
-          <DialogTrigger>
-            <button
-              type="button"
-              onClick={onOpenConfig}
-              className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
-              aria-label="Cài đặt"
-            >
-              ⚙️
-            </button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-sm px-5 py-10">
-            <DialogHeader>
-              <DialogTitle className="text-center text-[#2c7a37] text-3xl font-semibold">
-                NHẬP MÃ PIN
-              </DialogTitle>
-            </DialogHeader>
-            <Input></Input>
-            <DialogClose>
-              <Button>Cancel</Button>
-            </DialogClose>
-          </DialogContent>
-        </form>
-      </Dialog>
+      <ConfigDialog onOpenConfig={onOpenConfig} />
 
       <form
         onSubmit={handleSubmit(onSubmit)}

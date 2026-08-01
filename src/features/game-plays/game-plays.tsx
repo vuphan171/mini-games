@@ -6,8 +6,10 @@ import CustomerForm from "./components/customer-form";
 import PlayGame from "./components/game-screen-v2";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
+import { useNavigate } from "react-router-dom";
 
 const MiniGames = () => {
+  const navigate = useNavigate();
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
   const [config, setConfig] = useState<GameConfig>(DEFAULT_CONFIG);
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -31,7 +33,12 @@ const MiniGames = () => {
   return (
     <div className="font-sans">
       {screen === GAME_SCREENS.form && (
-        <CustomerForm onStart={startTutorial} onOpenConfig={() => {}} />
+        <CustomerForm
+          onStart={startTutorial}
+          onOpenConfig={() => {
+            navigate("/configs");
+          }}
+        />
       )}
       {screen === GAME_SCREENS.tutorial && (
         <TutorialScreen config={config} onStart={startGame} />
