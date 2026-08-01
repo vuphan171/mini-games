@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DEFAULT_CONFIG, type GameConfig } from "../../configs";
 import CustomerForm from "./components/customer-form";
-import GameScreen from "./components/game-screen";
+import GameScreenV2 from "./components/game-screen-v2";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
 import type { Customer, GameOutcome } from "./types";
@@ -25,7 +25,6 @@ export default function CowSoccerGame() {
 
   const finishGame = (result: GameOutcome) => {
     if (!customer) return;
-    // === Điểm nối Drive sau này: gọi API ghi 1 dòng (customer + result) vào file chung ===
     setOutcome(result);
     setScreen("result");
   };
@@ -38,9 +37,7 @@ export default function CowSoccerGame() {
       {screen === "tutorial" && (
         <TutorialScreen config={config} onStart={startGame} />
       )}
-      {screen === "game" && (
-        <GameScreen config={config} onFinish={finishGame} />
-      )}
+      {screen === "game" && <GameScreenV2 onFinish={finishGame} />}
       {screen === "result" && outcome && (
         <ResultScreen outcome={outcome} onDone={() => setScreen("form")} />
       )}

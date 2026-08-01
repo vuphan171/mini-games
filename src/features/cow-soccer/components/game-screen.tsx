@@ -273,16 +273,16 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
 
   return (
     <div
-      className="bg-game-gradient w-full flex flex-col select-none"
+      className="bg-game-gradient flex w-full items-center justify-center select-none"
       style={{ height: "100vh", touchAction: "none", overflow: "hidden" }}
     >
-      {/* Sân cỏ cuộn dọc, full màn hình */}
+      {/* Sân cỏ tỉ lệ dọc 2:3 (giống canvas 720x1080 trong game.html), letterbox 2 bên bằng nền trời-cỏ */}
       <div
         ref={fieldRef}
         className="relative"
         style={{
-          flex: 1,
-          minHeight: 0,
+          width: "min(100vw, calc(100vh * 2 / 3))",
+          height: "min(100vh, calc(100vw * 3 / 2))",
           overflow: "hidden",
           background: "repeating-linear-gradient(180deg,#3c9448 0,#3c9448 120px,#46a552 120px,#46a552 240px)",
           backgroundPositionY: st ? st.offset % 240 : 0,
@@ -295,15 +295,17 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
         onMouseUp={onUp}
         onMouseLeave={onUp}
       >
-        {/* Biên sân trái/phải */}
-        <div className="absolute" style={{ left: 14, top: 0, bottom: 0, width: 3, background: "rgba(255,255,255,0.8)" }} />
-        <div className="absolute" style={{ right: 14, top: 0, bottom: 0, width: 3, background: "rgba(255,255,255,0.8)" }} />
+        {/* Khung viền trắng bao quanh sân */}
+        <div
+          className="pointer-events-none absolute"
+          style={{ inset: 20, border: "4px solid rgba(255,255,255,.55)" }}
+        />
 
         {/* Vạch vôi + vòng tròn giữa sân cuộn xuống */}
         {st &&
           marks.map((y, i) => (
             <Fragment key={"m" + i}>
-              <div className="absolute" style={{ left: 14, right: 14, top: y, height: 3, background: "rgba(255,255,255,0.8)" }} />
+              <div className="absolute" style={{ left: 20, right: 20, top: y, height: 4, background: "rgba(255,255,255,.55)" }} />
               <div
                 className="absolute rounded-full"
                 style={{
@@ -312,7 +314,7 @@ export default function GameScreen({ config, onFinish }: GameScreenProps) {
                   width: 170,
                   height: 170,
                   transform: "translate(-50%,-50%)",
-                  border: "3px solid rgba(255,255,255,0.8)",
+                  border: "4px solid rgba(255,255,255,.55)",
                 }}
               />
             </Fragment>
