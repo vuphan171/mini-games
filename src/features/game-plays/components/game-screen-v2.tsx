@@ -49,7 +49,9 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
   onFinishRef.current = onFinish;
 
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(cfg.unlimitedTime ? 0 : cfg.timeLimit);
+  const [timeLeft, setTimeLeft] = useState(
+    cfg.unlimitedTime ? 0 : cfg.timeLimit,
+  );
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -76,7 +78,11 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
       finished.current = true;
       g.over = true;
       cancelAnimationFrame(rafId.current);
-      const result: GameResultKind = win ? "win" : obstacleHit ? "lose_obstacle" : "lose_timeout";
+      const result: GameResultKind = win
+        ? "win"
+        : obstacleHit
+          ? "lose_obstacle"
+          : "lose_timeout";
       onFinishRef.current({
         score: g.score,
         result,
@@ -135,6 +141,21 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
               : en.type === "virus"
                 ? "🦠"
                 : "🧑‍⚖️";
+
+        ctx.beginPath();
+        ctx.arc(en.x, en.y, 34, 0, Math.PI * 2);
+        if (en.kind === "item") {
+          ctx.fillStyle = "rgba(21,128,61,.55)";
+          ctx.strokeStyle = "rgba(20,83,45,1)";
+        } else {
+          ctx.fillStyle = "rgba(239,68,68,.55)";
+          ctx.strokeStyle = "rgba(127,29,29,1)";
+        }
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = "#000";
         ctx.fillText(glyph, en.x, en.y);
       }
       ctx.font = "84px serif";
@@ -154,12 +175,24 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
 
       if (now - g.lastSpawnItem > 750 / sp) {
         g.lastSpawnItem = now;
-        g.entities.push({ kind: "item", type: Math.random() < 0.5 ? "grain" : "grass", x: 60 + Math.random() * 600, y: -40 });
+        g.entities.push({
+          kind: "item",
+          type: Math.random() < 0.5 ? "grain" : "grass",
+          x: 60 + Math.random() * 600,
+          y: -40,
+        });
       }
       if (now - g.lastSpawnObs > 1600 / sp) {
         g.lastSpawnObs = now;
-        const t = (["vaccine", "virus", "ref"] as const)[Math.floor(Math.random() * 3)];
-        g.entities.push({ kind: "obs", type: t, x: 60 + Math.random() * 600, y: -40 });
+        const t = (["vaccine", "virus", "ref"] as const)[
+          Math.floor(Math.random() * 3)
+        ];
+        g.entities.push({
+          kind: "obs",
+          type: t,
+          x: 60 + Math.random() * 600,
+          y: -40,
+        });
       }
 
       const cowY = 940;
@@ -167,10 +200,15 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
       let gained = 0;
       for (const en of g.entities) {
         en.y += fall;
-        if (!en.hit && Math.abs(en.x - g.cowX) < 58 && Math.abs(en.y - cowY) < 62) {
+        if (
+          !en.hit &&
+          Math.abs(en.x - g.cowX) < 58 &&
+          Math.abs(en.y - cowY) < 62
+        ) {
           if (en.kind === "item") {
             en.hit = true;
-            gained += en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
+            gained +=
+              en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
           } else {
             endRound(false, true);
             return;
@@ -217,7 +255,9 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const hudTime = cfg.unlimitedTime ? `🎯 ${score}/${cfg.winningScore}` : `⏱ ${timeLeft}s`;
+  const hudTime = cfg.unlimitedTime
+    ? `🎯 ${score}/${cfg.winningScore}`
+    : `⏱ ${timeLeft}s`;
 
   return (
     <div
@@ -228,18 +268,33 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
         ref={canvasRef}
         width={720}
         height={1080}
-        style={{ height: "100vh", maxWidth: "100vw", touchAction: "none", display: "block" }}
+        style={{
+          height: "100vh",
+          maxWidth: "100vw",
+          touchAction: "none",
+          display: "block",
+        }}
       />
       <div className="pointer-events-none absolute top-3.5 right-0 left-0 flex justify-center gap-3.5">
         <div
           className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
-          style={{ borderColor: "#21351f", background: "#fff8e7", color: "#2c7a37", boxShadow: "0 4px 0 #21351f" }}
+          style={{
+            borderColor: "#21351f",
+            background: "#fff8e7",
+            color: "#2c7a37",
+            boxShadow: "0 4px 0 #21351f",
+          }}
         >
           ⭐ {score}
         </div>
         <div
           className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
-          style={{ borderColor: "#21351f", background: "#ffd54f", color: "#8a5a00", boxShadow: "0 4px 0 #21351f" }}
+          style={{
+            borderColor: "#21351f",
+            background: "#ffd54f",
+            color: "#8a5a00",
+            boxShadow: "0 4px 0 #21351f",
+          }}
         >
           {hudTime}
         </div>
