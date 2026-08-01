@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -18,24 +20,31 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
+import { getGameConfig, saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
 
+const DEFAULT_CONFIG: SettingsFormValues = {
+  pointsPerGrain: 10,
+  pointsPerGrass: 10,
+  unlimitedTime: false,
+  timeLimit: 45,
+  gameSpeed: GameSpeeds.normal,
+};
+
 const AdminConfigs = () => {
+  const navigate = useNavigate();
+
   const { control, handleSubmit, watch } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      pointsPerGrain: 10,
-      pointsPerGrass: 10,
-      unlimitedTime: false,
-      timeLimit: 45,
-      gameSpeed: GameSpeeds.normal,
-    },
+    defaultValues: getGameConfig() ?? DEFAULT_CONFIG,
   });
 
   const unlimitedTime = watch("unlimitedTime");
 
   const onSubmit = (data: SettingsFormValues) => {
-    console.log(data);
+    saveGameConfig(data);
+    toast.success("Đã lưu cài đặt");
+    navigate("/");
   };
 
   return (
