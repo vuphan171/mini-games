@@ -8,11 +8,11 @@ const gameSpeedValues = GAME_SPEED_OPTIONS.map((o) => o.value) as [
 
 export const schema = z
   .object({
-    pointsPerGrain: z.number({ error: "Must be a number" }),
-    pointsPerGrass: z.number({ error: "Must be a number" }),
+    pointsPerGrain: z.number({ error: "Phải là một số" }),
+    pointsPerGrass: z.number({ error: "Phải là một số" }),
     unlimitedTime: z.boolean(),
-    timeLimit: z.number({ error: "Must be a number" }).optional(),
-    winningScore: z.number({ error: "Must be a number" }).optional(),
+    timeLimit: z.number({ error: "Phải là một số" }).optional(),
+    winningScore: z.number({ error: "Phải là một số" }).optional(),
     gameSpeed: z.enum(gameSpeedValues),
   })
   .superRefine((data, ctx) => {
@@ -20,7 +20,7 @@ export const schema = z
       if (data.timeLimit == null || Number.isNaN(data.timeLimit)) {
         ctx.addIssue({
           code: "custom",
-          message: "Time limit per round is required",
+          message: "Vui lòng nhập thời gian mỗi lượt chơi",
           path: ["timeLimit"],
         });
       }
@@ -30,7 +30,7 @@ export const schema = z
     if (data.winningScore == null || Number.isNaN(data.winningScore)) {
       ctx.addIssue({
         code: "custom",
-        message: "Winning score is required",
+        message: "Vui lòng nhập điểm để thắng",
         path: ["winningScore"],
       });
       return;
@@ -40,7 +40,7 @@ export const schema = z
       ctx.addIssue({
         code: "custom",
         message:
-          "Winning score must be greater than points per grain + points per grass",
+          "Điểm để thắng phải lớn hơn tổng điểm mỗi bông lúa + điểm mỗi cọng cỏ",
         path: ["winningScore"],
       });
     }

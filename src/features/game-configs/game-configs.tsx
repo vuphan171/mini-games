@@ -51,7 +51,7 @@ const AdminConfigs = () => {
         }}
       >
         <h1 className="mb-6 text-2xl font-extrabold text-[#2c7a37]">
-          ⚙️ Game Settings
+          ⚙️ Cài đặt trò chơi
         </h1>
 
         <FieldGroup>
@@ -62,7 +62,7 @@ const AdminConfigs = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="font-semibold">
-                    Points per grain
+                    Điểm mỗi bông lúa
                   </FieldLabel>
                   <Input
                     {...field}
@@ -83,7 +83,7 @@ const AdminConfigs = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="font-semibold">
-                    Points per grass
+                    Điểm mỗi cọng cỏ
                   </FieldLabel>
                   <Input
                     {...field}
@@ -103,7 +103,7 @@ const AdminConfigs = () => {
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="unlimitedTime" className="font-semibold">
-                Unlimited play time
+                Không giới hạn thời gian chơi
               </FieldLabel>
             </FieldContent>
             <Controller
@@ -126,7 +126,7 @@ const AdminConfigs = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="font-semibold">
-                    Time limit per round (seconds)
+                    Thời gian mỗi lượt chơi (giây)
                   </FieldLabel>
                   <Input
                     {...field}
@@ -148,7 +148,7 @@ const AdminConfigs = () => {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name} className="font-semibold">
-                    Winning score
+                    Điểm để thắng
                   </FieldLabel>
                   <Input
                     {...field}
@@ -167,7 +167,7 @@ const AdminConfigs = () => {
 
           <Field>
             <FieldLabel htmlFor="gameSpeed" className="font-semibold">
-              Game speed
+              Tốc độ trò chơi
             </FieldLabel>
             <Controller
               control={control}
@@ -189,7 +189,7 @@ const AdminConfigs = () => {
             />
           </Field>
           <Button type="submit" variant="game" size="2xl" className="w-full">
-            Save settings
+            Lưu cài đặt
           </Button>
         </FieldGroup>
       </form>
