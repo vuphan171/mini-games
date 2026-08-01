@@ -17,10 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs/game-speed";
+import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
 import { schema, type SettingsFormValues } from "./schema";
 
-const SettingsScreen = () => {
+const AdminConfigs = () => {
   const { control, handleSubmit, watch } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -196,4 +196,4 @@ const SettingsScreen = () => {
   );
 };
 
-export default SettingsScreen;
+export default AdminConfigs;

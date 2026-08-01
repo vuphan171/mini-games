@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { GAME_SPEED_OPTIONS, type GameSpeed } from "./configs/game-speed";
+import { GAME_SPEED_OPTIONS, type GameSpeed } from "./configs";
 
-const gameSpeedValues = GAME_SPEED_OPTIONS.map((o) => o.value) as [GameSpeed, ...GameSpeed[]];
+const gameSpeedValues = GAME_SPEED_OPTIONS.map((o) => o.value) as [
+  GameSpeed,
+  ...GameSpeed[],
+];
 
 export const schema = z
   .object({
@@ -36,7 +39,8 @@ export const schema = z
     if (data.winningScore <= data.pointsPerGrain + data.pointsPerGrass) {
       ctx.addIssue({
         code: "custom",
-        message: "Winning score must be greater than points per grain + points per grass",
+        message:
+          "Winning score must be greater than points per grain + points per grass",
         path: ["winningScore"],
       });
     }
