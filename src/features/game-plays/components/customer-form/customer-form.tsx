@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -10,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { STORES } from "@/configs";
 import { ensureAudioContext } from "@/lib/audio";
+import APIService from "@/services/api-service";
 import { useCustomerSchema, TCustomerSchema } from "./schema";
 import type { Customer } from "../../types";
+import { QUERY_KEYS } from "@/configs/query-keys";
 
 type Props = {
   onStart: (info: Customer) => void;
@@ -23,6 +25,11 @@ type Props = {
 const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
   const customerSchema = useCustomerSchema();
 
+  const { data: stores = [], isLoading: isLoadingStores } = useQuery({
+    queryKey: [QUERY_KEYS.STORE_LIST],
+    queryFn: APIService.getStores,
+  });
+
   const { control, handleSubmit, formState } = useForm<TCustomerSchema>({
     resolver: zodResolver(customerSchema),
     mode: "onChange",
@@ -30,7 +37,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       name: "",
       email: "",
       phone: "",
-      store: STORES[STORES.length - 1],
+      store: "",
     },
   });
 
@@ -147,14 +154,20 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
             render={({ field }) => (
               <Field>
                 <FieldLabel htmlFor="store">Cửa hàng *</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isLoadingStores}
+                >
                   <SelectTrigger size="lg" id="store" className="w-full">
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={isLoadingStores ? "Đang tải..." : undefined}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {STORES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
+                    {stores.map((s) => (
+                      <SelectItem key={s.storeID} value={s.storeID}>
+                        {s.storeName}
                       </SelectItem>
                     ))}
                   </SelectContent>
