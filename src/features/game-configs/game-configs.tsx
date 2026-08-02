@@ -10,19 +10,13 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { GAME_SPEED_OPTIONS, DEFAULT_GAME_CONFIG } from "./configs";
 import { getGameConfig, saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const AdminConfigs = () => {
   const navigate = useNavigate();
@@ -188,25 +182,31 @@ const AdminConfigs = () => {
             <div className="border-t border-divider-warm" />
 
             <Field>
-              <FieldLabel htmlFor="gameSpeed" className="font-semibold">
-                Tốc độ trò chơi
-              </FieldLabel>
+              <FieldLabel className="font-semibold">Tốc độ trò chơi</FieldLabel>
               <Controller
                 control={control}
                 name="gameSpeed"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="gameSpeed" size="lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {GAME_SPEED_OPTIONS.map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="mt-4 flex flex-wrap gap-6"
+                  >
+                    {GAME_SPEED_OPTIONS.map(({ value, label }) => (
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem
+                          value={value}
+                          id={`gameSpeed-${value}`}
+                        />
+                        <Label
+                          className="font-semibold"
+                          htmlFor={`gameSpeed-${value}`}
+                        >
                           {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                 )}
               />
             </Field>

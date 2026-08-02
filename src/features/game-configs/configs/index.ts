@@ -8,10 +8,10 @@ export const GameSpeeds = {
 } as const;
 
 export const GAME_SPEED_OPTIONS = [
-  { value: GameSpeeds.slow, label: "Slow" },
-  { value: GameSpeeds.normal, label: "Normal" },
-  { value: GameSpeeds.fast, label: "Fast" },
-  { value: GameSpeeds.veryFast, label: "Very Fast" },
+  { value: GameSpeeds.slow, label: "Chậm" },
+  { value: GameSpeeds.normal, label: "Bình thường" },
+  { value: GameSpeeds.fast, label: "Nhanh" },
+  { value: GameSpeeds.veryFast, label: "Rất nhanh" },
 ] as const;
 
 const DEFAULT_GAME_CONFIG: SettingsFormValues = {
