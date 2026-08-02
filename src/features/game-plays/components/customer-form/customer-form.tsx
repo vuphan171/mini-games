@@ -17,6 +17,8 @@ import { useCustomerSchema, TCustomerSchema } from "./schema";
 import type { Customer } from "../../types";
 import { QUERY_KEYS } from "@/configs/query-keys";
 import { IconSetting } from "@/assets";
+import CowHoldingBall from "@/assets/logos/cow-holding-ball.png";
+import AppLogo from "@/assets/logos/app-logo.png";
 
 type Props = {
   onStart: (info: Customer) => void;
@@ -57,13 +59,40 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       >
         <IconSetting className="text-white size-6" />
       </button>
-
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full max-w-xl md:max-w-2xl"
+        className="flex w-full max-w-xl md:max-w-2xl lg:max-w-3xl mt-20 md:mt-0"
       >
         <div className="flex w-full flex-col rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
-          <p className="text-center text-3xl font-bold text-foreground mb-6">
+          <div className="mb-10 flex flex-col items-center justify-between md:flex-row gap-4">
+            <div className="flex items-center order-2 gap-2 md:order-1">
+              <img
+                width={100}
+                height={100}
+                src={CowHoldingBall}
+                alt="Cow Holding Ball"
+                fetchPriority="high"
+                loading="eager"
+                decoding="sync"
+              />
+              <p className="text-4xl font-bold text-brand-tertiary">
+                SIÊU BÒ ÚC <br /> SÚT BÓNG
+              </p>
+            </div>
+            <div className="order-1 md:order-2">
+              <img
+                width="auto"
+                height={100}
+                src={AppLogo}
+                className="h-28 w-auto"
+                alt="App Logo"
+                fetchPriority="high"
+                loading="eager"
+                decoding="sync"
+              />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-foreground mb-6">
             Nhập thông tin để bắt đầu chơi và nhận quà!
           </p>
           <div className="grid grid-cols-12 gap-6">
