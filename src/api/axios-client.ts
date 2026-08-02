@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_APP_URL_API,
+  baseURL: import.meta.env.DEV ? "/api" : import.meta.env.VITE_APP_URL_API,
   headers: {
     "content-type": "application/json",
     "ngrok-skip-browser-warning": "true",

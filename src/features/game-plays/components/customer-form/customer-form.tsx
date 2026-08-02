@@ -47,7 +47,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
   };
 
   return (
-    <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
+    <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
       <button
         type="button"
         className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
@@ -59,122 +59,128 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full max-w-xl flex-col items-center gap-3.5 py-7"
+        className="flex w-full max-w-xl md:max-w-2xl"
       >
-        <div className="flex flex-col items-center gap-0.5 text-center">
-          <div className="text-7xl">🐮</div>
-          <h1
-            className="text-5xl leading-none font-extrabold text-white"
-            style={{
-              textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)",
-            }}
-          >
-            SIÊU BÒ ÚC
-          </h1>
-          <h2
-            className="text-2xl leading-tight font-extrabold text-[#ffd54f]"
-            style={{ textShadow: "0 3px 0 #8a5a00, 0 5px 12px rgba(0,0,0,.3)" }}
-          >
-            ⚽ SÚT BÓNG ⚽
-          </h2>
-        </div>
-
-        <div
-          className="flex w-full flex-col gap-3.5 rounded-[22px] border-4 p-6"
-          style={{
-            borderColor: "#21351f",
-            background: "#fff8e7",
-            boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
-          }}
-        >
-          <p className="text-center text-lg font-bold text-[#2c7a37]">
-            Nhập thông tin để bắt đầu 🎮
+        <div className="flex w-full flex-col gap-3.5 rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
+          <p className="text-center text-3xl font-bold text-foreground mb-6">
+            Nhập thông tin để bắt đầu chơi và nhận quà!
           </p>
-
-          <Controller
-            name="name"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Tên khách hàng *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="Nguyễn Văn A"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="email"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="a@email.com"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Số điện thoại *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="0901234567"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="store"
-            control={control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel htmlFor="store">Cửa hàng *</FieldLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={isLoadingStores}
-                >
-                  <SelectTrigger size="lg" id="store" className="w-full">
-                    <SelectValue
-                      placeholder={isLoadingStores ? "Đang tải..." : undefined}
+          <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-12">
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="capitalize"
+                      required
+                      htmlFor={field.name}
+                    >
+                      Tên khách hàng
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="Nguyễn Văn A"
+                      aria-invalid={fieldState.invalid}
                     />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stores.map((s) => (
-                      <SelectItem key={s.storeID} value={s.storeID}>
-                        {s.storeName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="col-span-12 md:col-span-6">
+              <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      required
+                      className="capitalize"
+                      htmlFor={field.name}
+                    >
+                      Email
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="a@email.com"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="col-span-12 md:col-span-6">
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="capitalize"
+                      required
+                      htmlFor={field.name}
+                    >
+                      Số điện thoại
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="0901234567"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="col-span-12">
+              <Controller
+                name="store"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel className="capitalize" required htmlFor="store">
+                      Cửa hàng
+                    </FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoadingStores}
+                    >
+                      <SelectTrigger size="lg" id="store" className="w-full">
+                        <SelectValue
+                          placeholder={
+                            isLoadingStores ? "Đang tải..." : undefined
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stores.map((s) => (
+                          <SelectItem key={s.storeID} value={s.storeID}>
+                            {s.storeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
 
           <Button
             type="submit"

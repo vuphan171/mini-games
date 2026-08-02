@@ -49,11 +49,12 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --border-input: 3px;
+  --shadow-card: 0px 20px 50px 0px rgba(0, 0, 0, 0.3);
 }
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: #21351f;
+  --foreground: #333333;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -68,9 +69,9 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
-  --input: #21351f;
-  --input-focus: rgb(44, 122, 55);
-  --input-focus-ring: rgba(60, 148, 72, 0.3);
+  --input: #bdbdbd;
+  --input-focus: #27ae60;
+  --input-focus-ring: rgba(39, 174, 96, 0.3);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
