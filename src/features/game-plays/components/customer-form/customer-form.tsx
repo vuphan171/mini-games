@@ -16,6 +16,7 @@ import APIService from "@/services/api-service";
 import { useCustomerSchema, TCustomerSchema } from "./schema";
 import type { Customer } from "../../types";
 import { QUERY_KEYS } from "@/configs/query-keys";
+import { IconSetting } from "@/assets";
 
 type Props = {
   onStart: (info: Customer) => void;
@@ -37,7 +38,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       name: "",
       email: "",
       phone: "",
-      store: "",
+      store: undefined,
     },
   });
 
@@ -50,18 +51,18 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
     <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
       <button
         type="button"
-        className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
+        className="absolute top-6 right-6 size-11 flex items-center justify-center bg-brand-gradient rounded-full text-2xl"
         aria-label="Cài đặt"
         onClick={onOpenConfig}
       >
-        ⚙️
+        <IconSetting className="text-white size-6" />
       </button>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex w-full max-w-xl md:max-w-2xl"
       >
-        <div className="flex w-full flex-col gap-3.5 rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
+        <div className="flex w-full flex-col rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
           <p className="text-center text-3xl font-bold text-foreground mb-6">
             Nhập thông tin để bắt đầu chơi và nhận quà!
           </p>
@@ -162,11 +163,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                       disabled={isLoadingStores}
                     >
                       <SelectTrigger size="lg" id="store" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            isLoadingStores ? "Đang tải..." : undefined
-                          }
-                        />
+                        <SelectValue placeholder="Chọn cửa hàng" />
                       </SelectTrigger>
                       <SelectContent>
                         {stores.map((s) => (
@@ -181,15 +178,14 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
               />
             </div>
           </div>
-
           <Button
             type="submit"
             size="2xl"
             variant="game"
             disabled={!formState.isValid}
-            className="mt-1 w-full"
+            className="mt-10 w-full"
           >
-            ▶ BẮT ĐẦU CHƠI
+            BẮT ĐẦU CHƠI
           </Button>
         </div>
       </form>

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
@@ -19,7 +20,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
-        game: "h-15 rounded-2xl border-4 border-foreground bg-[#ffb300] text-2xl font-extrabold text-[#4a2f00] shadow-[0_6px_0_#8a5a00] hover:bg-[#ffb300]/90 disabled:border-[#a4ac96] disabled:bg-[#d5d9c8] disabled:text-[#8b937f] disabled:shadow-[0_6px_0_#a4ac96]",
+        game: "h-15 rounded-xl bg-brand-gradient text-2xl font-extrabold text-white hover:bg-brand/90 disabled:opacity-40 disabled:text-white",
       },
       size: {
         default:

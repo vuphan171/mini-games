@@ -50,6 +50,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --border-input: 3px;
   --shadow-card: 0px 20px 50px 0px rgba(0, 0, 0, 0.3);
+  --color-brand: var(--brand);
+  --color-brand-secondary: var(--brand-secondary);
 }
 
 :root {
@@ -73,6 +75,8 @@
   --input-focus: #27ae60;
   --input-focus-ring: rgba(39, 174, 96, 0.3);
   --ring: oklch(0.708 0 0);
+  --brand: #32d577;
+  --brand-secondary: #219653;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -143,6 +147,14 @@
       #a5dcb0 22%,
       #3c9448 40%,
       #2c7a37 100%
+    );
+  }
+
+  .bg-brand-gradient {
+    background: linear-gradient(
+      180deg,
+      var(--brand) 0%,
+      var(--brand-secondary) 100%
     );
   }
 }
