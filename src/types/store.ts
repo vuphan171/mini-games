@@ -13,3 +13,12 @@ export interface Store {
   lastGamePlay: string | null;
   _rowIndex: number;
 }
+
+export interface UpdateStorePayload {
+  pointsPerGrain: number;
+  pointsPerGrass: number;
+  unlimitedTime: boolean;
+  timeLimit?: number;
+  winningScore?: number;
+  gameSpeed: string;
+}

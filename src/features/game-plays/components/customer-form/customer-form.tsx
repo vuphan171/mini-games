@@ -19,10 +19,11 @@ import { QUERY_KEYS } from "@/configs/query-keys";
 import { IconSetting } from "@/assets";
 import CowHoldingBall from "@/assets/logos/cow-holding-ball.png";
 import AppLogo from "@/assets/logos/app-logo.png";
+import { useEffect } from "react";
 
 type Props = {
   onStart: (info: Customer) => void;
-  onOpenConfig: () => void;
+  onOpenConfig: (storeId: string) => void;
 };
 
 const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
@@ -33,16 +34,25 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
     queryFn: APIService.getStores,
   });
 
-  const { control, handleSubmit, formState } = useForm<TCustomerSchema>({
-    resolver: zodResolver(customerSchema),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      store: undefined,
-    },
-  });
+  const { control, reset, getValues, handleSubmit, formState } =
+    useForm<TCustomerSchema>({
+      resolver: zodResolver(customerSchema),
+      mode: "onChange",
+      defaultValues: {
+        name: "",
+        email: "",
+        phone: "",
+        store: undefined,
+      },
+    });
+
+  useEffect(() => {
+    const storeId = stores?.length ? stores[stores.length - 1].storeID : "";
+    if (!storeId) return;
+    reset({
+      store: storeId,
+    });
+  }, [reset, stores]);
 
   const onSubmit = (data: TCustomerSchema) => {
     ensureAudioContext();
@@ -55,7 +65,11 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         type="button"
         className="absolute top-6 right-6 size-11 flex items-center justify-center bg-brand-gradient rounded-full text-2xl"
         aria-label="Cài đặt"
-        onClick={onOpenConfig}
+        onClick={() => {
+          const storeId = getValues("store");
+          if (!storeId) return;
+          onOpenConfig(storeId);
+        }}
       >
         <IconSetting className="text-white size-6" />
       </button>

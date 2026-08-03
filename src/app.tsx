@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route element={<AppLayouts />}>
           <Route path="/" element={<GamePlays />} />
-          <Route path="/configs" element={<GameConfigs />} />
+          <Route path="/configs/:store_id" element={<GameConfigs />} />
         </Route>
       </Routes>
       <Toaster position="top-center" />

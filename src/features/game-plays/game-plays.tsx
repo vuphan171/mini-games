@@ -3,7 +3,7 @@ import { GAME_SPEED_OPTIONS, type GameSpeed } from "../game-configs/configs";
 import { getGameConfig } from "../game-configs/helpers";
 import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
-import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "./configs/game-v2";
+import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "./configs/game";
 import CustomerForm from "./components/customer-form";
 import PlayGame from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 const GAME_SPEED_LABELS = Object.fromEntries(
   GAME_SPEED_OPTIONS.map(({ value, label }) => [value, label]),
-) as Record<GameSpeed, GameV2Config["gameSpeed"]>;
+) as unknown as Record<GameSpeed, GameV2Config["gameSpeed"]>;
 
 const MiniGames = () => {
   const navigate = useNavigate();
@@ -64,8 +64,8 @@ const MiniGames = () => {
       {screen === GAME_SCREENS.form && (
         <CustomerForm
           onStart={startTutorial}
-          onOpenConfig={() => {
-            navigate("/configs");
+          onOpenConfig={(storeId) => {
+            navigate(`/configs/${storeId}`);
           }}
         />
       )}

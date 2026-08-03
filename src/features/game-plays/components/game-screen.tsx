@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { GameOutcome, GameResultKind } from "../types";
-import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game-v2";
+import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game";
 
 // Bản sao 1:1 logic + canvas render từ docs/game.html (bản gốc "Siêu Bò Úc Sút Bóng")
 

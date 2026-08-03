@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
+import APIService from "@/services/api-service";
+import type { UpdateStorePayload } from "@/types/store";
 import { GAME_SPEED_OPTIONS, DEFAULT_GAME_CONFIG } from "./configs";
 import { getGameConfig, saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
@@ -19,16 +21,41 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 const AdminConfigs = () => {
+  const { store_id } = useParams();
+
   const navigate = useNavigate();
 
-  const { control, handleSubmit, watch } = useForm<SettingsFormValues>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: getGameConfig() ?? DEFAULT_GAME_CONFIG,
   });
 
   const unlimitedTime = watch("unlimitedTime");
 
-  const onSubmit = (data: SettingsFormValues) => {
+  const onSubmit = async (data: SettingsFormValues) => {
+    if (!store_id) return;
+
+    const payload: UpdateStorePayload = {
+      pointsPerGrain: data.pointsPerGrain,
+      pointsPerGrass: data.pointsPerGrass,
+      unlimitedTime: data.unlimitedTime,
+      timeLimit: data.timeLimit,
+      winningScore: data.winningScore,
+      gameSpeed: data.gameSpeed,
+    };
+
+    const success = await APIService.updateStore(store_id, payload);
+
+    if (!success) {
+      toast.error("Lưu cài đặt thất bại");
+      return;
+    }
+
     saveGameConfig(data);
     toast.success("Đã lưu cài đặt");
     navigate("/");
@@ -193,7 +220,7 @@ const AdminConfigs = () => {
                     className="mt-4 flex flex-wrap gap-6"
                   >
                     {GAME_SPEED_OPTIONS.map(({ value, label }) => (
-                      <div className="flex items-center gap-3">
+                      <div key={value} className="flex items-center gap-3">
                         <RadioGroupItem
                           value={value}
                           id={`gameSpeed-${value}`}
@@ -215,6 +242,7 @@ const AdminConfigs = () => {
               variant="game"
               size="2xl"
               className="w-full uppercase"
+              disabled={isSubmitting}
             >
               Lưu cài đặt
             </Button>
