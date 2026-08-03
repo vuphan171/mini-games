@@ -1,429 +1,360 @@
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { BEEF_POINT, COW_R, ICONS, RADII, SPEED_PRESETS, type GameConfig, type ItemType } from "../../../configs";
-import { sfx } from "../../../lib/audio";
-import { clamp, rand } from "../../../lib/utils";
+import { useEffect, useRef, useState } from "react";
 import type { GameOutcome, GameResultKind } from "../types";
+import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game-v2";
 
-interface GameScreenProps {
-  config: GameConfig;
+// Bản sao 1:1 logic + canvas render từ docs/game.html (bản gốc "Siêu Bò Úc Sút Bóng")
+
+// TextMetrics.actualBoundingBox* không đáng tin cậy với emoji màu/ZWJ trên Safari
+// (thường trả về 0), nên canh giữa bằng cách quét pixel thực tế đã render, thay vì
+// dựa vào font metrics — chính xác trên mọi trình duyệt vì đo trên kết quả vẽ thật.
+const glyphOffsetCache = new Map<string, { x: number; y: number }>();
+
+const NO_OFFSET = { x: 0, y: 0 };
+
+// Lỡ có gì bất thường (getContext trả về null, getImageData bị chặn...) thì
+// trả về NO_OFFSET để fillText vẫn vẽ bình thường (chỉ mất phần canh giữa tinh
+// chỉnh), không làm crash cả vòng lặp vẽ game.
+const getGlyphCenterOffset = (font: string, glyph: string) => {
+  const cacheKey = `${font}::${glyph}`;
+  const cached = glyphOffsetCache.get(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const size = 140;
+    const center = size / 2;
+    const off = document.createElement("canvas");
+    off.width = size;
+    off.height = size;
+    const octx = off.getContext("2d");
+    if (!octx) return NO_OFFSET;
+
+    octx.font = font;
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    octx.fillText(glyph, center, center);
+
+    const { data } = octx.getImageData(0, 0, size, size);
+    let minX = size;
+    let maxX = -1;
+    let minY = size;
+    let maxY = -1;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (data[(y * size + x) * 4 + 3] > 10) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    const offset =
+      maxX >= minX
+        ? { x: center - (minX + maxX) / 2, y: center - (minY + maxY) / 2 }
+        : NO_OFFSET;
+    glyphOffsetCache.set(cacheKey, offset);
+    return offset;
+  } catch {
+    return NO_OFFSET;
+  }
+};
+
+const SPEED_MULT: Record<GameV2Config["gameSpeed"], number> = {
+  Slow: 0.7,
+  Normal: 1,
+  Fast: 1.4,
+  "Very Fast": 1.8,
+};
+
+type ItemType = "grain" | "grass";
+type ObsType = "vaccine" | "virus" | "ref";
+type Entity =
+  | { kind: "item"; type: ItemType; x: number; y: number; hit?: boolean }
+  | { kind: "obs"; type: ObsType; x: number; y: number; hit?: boolean };
+
+interface GameState {
+  cowX: number;
+  targetX: number;
+  dragging: boolean;
+  entities: Entity[];
+  score: number;
+  startTime: number;
+  lastSpawnItem: number;
+  lastSpawnObs: number;
+  lastT: number;
+  speed: number;
+  over: boolean;
+}
+
+interface GameScreenV2Props {
+  config?: Partial<GameV2Config>;
   onFinish: (result: GameOutcome) => void;
 }
 
-interface Item {
-  id: number;
-  type: ItemType;
-  x: number;
-  y: number;
-}
-
-interface GameState {
-  w: number;
-  h: number;
-  cowX: number;
-  cowY: number;
-  items: Item[];
-  score: number;
-  timeLeft: number;
-  spawnT: number;
-  offset: number; // độ cuộn sân
-  elapsed: number;
-}
-
-type PointerLikeEvent = React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>;
-
-const getClientX = (e: PointerLikeEvent): number | null => {
-  if ("touches" in e) return e.touches.length ? e.touches[0].clientX : null;
-  return e.clientX;
-};
-
-export default function GameScreen({ config, onFinish }: GameScreenProps) {
-  const fieldRef = useRef<HTMLDivElement>(null);
-  const preset = SPEED_PRESETS[config.speed] || SPEED_PRESETS.medium;
-
-  const [, setTick] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [countdown, setCountdown] = useState(3);
-
-  const S = useRef<GameState | null>(null);
-  const drag = useRef<{ active: boolean; targetX: number | null }>({ active: false, targetX: null });
-  const keys = useRef<Record<string, boolean>>({});
+export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
+  const cfg = useRef<GameV2Config>({
+    ...DEFAULT_GAME_V2_CONFIG,
+    ...config,
+  }).current;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameRef = useRef<GameState | null>(null);
   const rafId = useRef(0);
   const finished = useRef(false);
-  const idSeq = useRef(1);
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
 
-  // Khởi tạo: đo kích thước sân (thử lại vài frame nếu chưa có)
-  useEffect(() => {
-    let cancelled = false;
-    let tries = 0;
-    const init = () => {
-      if (cancelled) return;
-      const el = fieldRef.current;
-      const w = el ? el.clientWidth : 0;
-      const h = el ? el.clientHeight : 0;
-      if ((w < 200 || h < 300) && tries < 30) {
-        tries++;
-        requestAnimationFrame(init);
-        return;
-      }
-      const W = Math.max(w, 320);
-      const H = Math.max(h, 480);
-      S.current = {
-        w: W,
-        h: H,
-        cowX: W / 2,
-        cowY: H - 110, // bò cố định gần đáy
-        items: [],
-        score: 0,
-        timeLeft: config.duration,
-        spawnT: 0,
-        offset: 0,
-        elapsed: 0,
-      };
-      setReady(true);
-    };
-    requestAnimationFrame(init);
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Đếm ngược 3-2-1
-  useEffect(() => {
-    if (!ready || countdown <= 0) return;
-    const t = setTimeout(() => setCountdown((c) => c - 1), 800);
-    return () => clearTimeout(t);
-  }, [ready, countdown]);
-
-  const endGame = useCallback(
-    (result: GameResultKind) => {
-      if (finished.current) return;
-      finished.current = true;
-      cancelAnimationFrame(rafId.current);
-      if (result === "win") sfx.win();
-      else sfx.lose();
-      const st = S.current;
-      onFinish({
-        score: st ? st.score : 0,
-        result,
-        playedSeconds: st ? Math.round(config.duration - st.timeLeft) : 0,
-      });
-    },
-    [onFinish, config.duration],
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(
+    cfg.unlimitedTime ? 0 : cfg.timeLimit,
   );
 
-  // Sinh vật phẩm mới ở mép trên
-  const spawn = (st: GameState) => {
-    const pad = 50;
-    const isObstacle = Math.random() < preset.obstacleProb && st.elapsed > 1.2; // 1.2s đầu chỉ có thịt
-    let type: ItemType;
-    if (!isObstacle) type = "beef";
-    else type = Math.random() < 0.7 ? "ball" : "ref";
-
-    // tìm x không dính vật phẩm khác đang ở gần mép trên
-    let x = rand(pad, st.w - pad);
-    for (let i = 0; i < 10; i++) {
-      const near = st.items.some((it) => it.y < 140 && Math.abs(it.x - x) < 90);
-      if (!near) break;
-      x = rand(pad, st.w - pad);
-    }
-    st.items.push({ id: idSeq.current++, type, x, y: -50 });
-    if (type === "ball") sfx.bounce();
-  };
-
-  // Vòng lặp game
   useEffect(() => {
-    if (!ready || countdown > 0 || !S.current || finished.current) return;
-    let last = performance.now();
+    const cv = canvasRef.current;
+    const ctx = cv?.getContext("2d");
+    if (!cv || !ctx) return;
 
-    const loop = (now: number) => {
+    const g: GameState = {
+      cowX: 360,
+      targetX: 360,
+      dragging: false,
+      entities: [],
+      score: 0,
+      startTime: performance.now(),
+      lastSpawnItem: 0,
+      lastSpawnObs: 0,
+      lastT: performance.now(),
+      speed: SPEED_MULT[cfg.gameSpeed] || 1,
+      over: false,
+    };
+    gameRef.current = g;
+
+    const endRound = (win: boolean, obstacleHit: boolean) => {
       if (finished.current) return;
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-      const st = S.current;
-      if (!st) return;
-      st.elapsed += dt;
+      finished.current = true;
+      g.over = true;
+      cancelAnimationFrame(rafId.current);
+      const result: GameResultKind = win
+        ? "win"
+        : obstacleHit
+          ? "lose_obstacle"
+          : "lose_timeout";
+      onFinishRef.current({
+        score: g.score,
+        result,
+        playedSeconds: Math.round((performance.now() - g.startTime) / 1000),
+      });
+    };
 
-      // --- Di chuyển bò (kéo tay hoặc phím trái/phải) ---
-      let target: number | null = null;
-      if (drag.current.active && drag.current.targetX != null) {
-        target = drag.current.targetX;
-      } else {
-        const dir =
-          (keys.current.ArrowRight || keys.current.d ? 1 : 0) - (keys.current.ArrowLeft || keys.current.a ? 1 : 0);
-        if (dir !== 0) target = st.cowX + dir * 1000;
+    const setTarget = (clientX: number) => {
+      const r = cv.getBoundingClientRect();
+      g.targetX = ((clientX - r.left) / r.width) * 720;
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      g.dragging = true;
+      cv.setPointerCapture(e.pointerId);
+      setTarget(e.clientX);
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (g.dragging) setTarget(e.clientX);
+    };
+    const onPointerUp = () => {
+      g.dragging = false;
+      g.targetX = g.cowX;
+    };
+    cv.addEventListener("pointerdown", onPointerDown);
+    cv.addEventListener("pointermove", onPointerMove);
+    cv.addEventListener("pointerup", onPointerUp);
+    cv.addEventListener("pointercancel", onPointerUp);
+
+    const draw = () => {
+      for (let i = 0; i < 9; i++) {
+        ctx.fillStyle = i % 2 ? "#3c9448" : "#46a552";
+        ctx.fillRect(0, i * 120, 720, 120);
       }
-      if (target != null) {
-        const dx = target - st.cowX;
-        const step = preset.cowSpeed * dt;
-        st.cowX += Math.abs(dx) <= step ? dx : Math.sign(dx) * step;
-        st.cowX = clamp(st.cowX, COW_R + 6, st.w - COW_R - 6);
-      }
+      ctx.strokeStyle = "rgba(255,255,255,.55)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(30, 30, 660, 1020);
+      ctx.beginPath();
+      ctx.arc(360, 540, 90, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(30, 540);
+      ctx.lineTo(690, 540);
+      ctx.stroke();
 
-      // --- Cuộn sân ---
-      st.offset += preset.scroll * dt;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (const en of g.entities) {
+        ctx.font = "52px serif";
+        const glyph =
+          en.kind === "item"
+            ? en.type === "grain"
+              ? "🌾"
+              : "🌿"
+            : en.type === "vaccine"
+              ? "💉"
+              : en.type === "virus"
+                ? "🦠"
+                : "🧑‍⚖️";
 
-      // --- Sinh vật phẩm ---
-      st.spawnT += dt;
-      if (st.spawnT >= preset.spawnEvery) {
-        st.spawnT = 0;
-        spawn(st);
-        if (Math.random() < 0.35) spawn(st); // thỉnh thoảng sinh đôi
-      }
-
-      // --- Vật phẩm trôi xuống + va chạm ---
-      const cow = { x: st.cowX, y: st.cowY };
-      for (let i = st.items.length - 1; i >= 0; i--) {
-        const it = st.items[i];
-        it.y += preset.scroll * dt;
-
-        const d = Math.hypot(cow.x - it.x, cow.y - it.y);
-        if (it.type === "beef") {
-          if (d < COW_R + RADII.beef) {
-            st.items.splice(i, 1);
-            st.score += BEEF_POINT;
-            sfx.eat();
-            if (st.score >= config.winScore) {
-              setTick((n) => n + 1);
-              endGame("win");
-              return;
-            }
-            continue;
-          }
+        ctx.beginPath();
+        ctx.arc(en.x, en.y, 34, 0, Math.PI * 2);
+        if (en.kind === "item") {
+          ctx.fillStyle = "rgba(21,128,61,.55)";
+          ctx.strokeStyle = "rgba(20,83,45,1)";
         } else {
-          if (d < COW_R + RADII[it.type] - 8) {
-            // trừ 8px cho dễ thở
-            sfx.whistle();
-            setTick((n) => n + 1);
-            setTimeout(() => endGame("lose_obstacle"), 350);
+          ctx.fillStyle = "rgba(239,68,68,.55)";
+          ctx.strokeStyle = "rgba(127,29,29,1)";
+        }
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = "#000";
+        const offset = getGlyphCenterOffset(ctx.font, glyph);
+        ctx.fillText(glyph, en.x + offset.x, en.y + offset.y);
+      }
+      ctx.font = "84px serif";
+      ctx.fillText("🐮", g.cowX, 940);
+    };
+
+    const tick = (now: number) => {
+      if (g.over) return;
+      const dt = Math.min((now - g.lastT) / 1000, 0.05);
+      g.lastT = now;
+      const sp = g.speed;
+
+      const maxV = 900 * sp * dt;
+      const dx = g.targetX - g.cowX;
+      g.cowX += Math.abs(dx) <= maxV ? dx : Math.sign(dx) * maxV;
+      g.cowX = Math.max(60, Math.min(660, g.cowX));
+
+      if (now - g.lastSpawnItem > 750 / sp) {
+        g.lastSpawnItem = now;
+        g.entities.push({
+          kind: "item",
+          type: Math.random() < 0.5 ? "grain" : "grass",
+          x: 60 + Math.random() * 600,
+          y: -40,
+        });
+      }
+      if (now - g.lastSpawnObs > 1600 / sp) {
+        g.lastSpawnObs = now;
+        const t = (["vaccine", "virus", "ref"] as const)[
+          Math.floor(Math.random() * 3)
+        ];
+        g.entities.push({
+          kind: "obs",
+          type: t,
+          x: 60 + Math.random() * 600,
+          y: -40,
+        });
+      }
+
+      const cowY = 940;
+      const fall = 260 * sp * dt;
+      let gained = 0;
+      for (const en of g.entities) {
+        en.y += fall;
+        if (
+          !en.hit &&
+          Math.abs(en.x - g.cowX) < 58 &&
+          Math.abs(en.y - cowY) < 62
+        ) {
+          if (en.kind === "item") {
+            en.hit = true;
+            gained +=
+              en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
+          } else {
+            endRound(false, true);
             return;
           }
         }
-        if (it.y > st.h + 60) st.items.splice(i, 1);
+      }
+      g.entities = g.entities.filter((en) => !en.hit && en.y < 1140);
+
+      if (gained) {
+        g.score += gained;
+        setScore(g.score);
+        if (cfg.unlimitedTime && g.score >= cfg.winningScore) {
+          endRound(true, false);
+          return;
+        }
       }
 
-      // --- Thời gian ---
-      st.timeLeft -= dt;
-      if (st.timeLeft <= 0) {
-        st.timeLeft = 0;
-        setTick((n) => n + 1);
-        endGame("lose_timeout");
-        return;
+      const elapsed = (now - g.startTime) / 1000;
+      if (!cfg.unlimitedTime) {
+        const left = Math.max(0, Math.ceil(cfg.timeLimit - elapsed));
+        setTimeLeft((prev) => (prev !== left ? left : prev));
+        if (elapsed >= cfg.timeLimit) {
+          endRound(true, false);
+          return;
+        }
+      } else {
+        const t = Math.floor(elapsed);
+        setTimeLeft((prev) => (prev !== t ? t : prev));
       }
 
-      setTick((n) => n + 1);
-      rafId.current = requestAnimationFrame(loop);
+      draw();
+      rafId.current = requestAnimationFrame(tick);
     };
 
-    rafId.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafId.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, countdown, endGame, config.winScore]);
+    rafId.current = requestAnimationFrame(tick);
 
-  // Bàn phím (test trên máy tính)
-  useEffect(() => {
-    const dn = (e: KeyboardEvent) => {
-      keys.current[e.key] = true;
-    };
-    const up = (e: KeyboardEvent) => {
-      keys.current[e.key] = false;
-    };
-    window.addEventListener("keydown", dn);
-    window.addEventListener("keyup", up);
     return () => {
-      window.removeEventListener("keydown", dn);
-      window.removeEventListener("keyup", up);
+      cancelAnimationFrame(rafId.current);
+      cv.removeEventListener("pointerdown", onPointerDown);
+      cv.removeEventListener("pointermove", onPointerMove);
+      cv.removeEventListener("pointerup", onPointerUp);
+      cv.removeEventListener("pointercancel", onPointerUp);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Kéo ngang để điều khiển bò: chạm bất kỳ đâu trên sân
-  const setTarget = (clientX: number) => {
-    const el = fieldRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    drag.current.targetX = clientX - r.left;
-  };
-  const onDown = (e: PointerLikeEvent) => {
-    if (e.cancelable) e.preventDefault();
-    drag.current.active = true;
-    const x = getClientX(e);
-    if (x != null) setTarget(x);
-  };
-  const onMove = (e: PointerLikeEvent) => {
-    if (!drag.current.active) return;
-    if (e.cancelable) e.preventDefault();
-    const x = getClientX(e);
-    if (x != null) setTarget(x);
-  };
-  const onUp = () => {
-    drag.current = { active: false, targetX: null };
-  };
-
-  const st = S.current;
-
-  // Vạch sân lặp lại mỗi CYCLE px (1 vạch ngang + 1 vòng tròn giữa sân)
-  const CYCLE = 620;
-  const marks: number[] = [];
-  if (st) {
-    const base = st.offset % CYCLE;
-    for (let k = -1; k * CYCLE + base < st.h + CYCLE; k++) {
-      marks.push(base + k * CYCLE);
-    }
-  }
+  const hudTime = cfg.unlimitedTime
+    ? `🎯 ${score}/${cfg.winningScore}`
+    : `⏱ ${timeLeft}s`;
 
   return (
     <div
-      className="bg-game-gradient flex w-full items-center justify-center select-none"
-      style={{ height: "100vh", touchAction: "none", overflow: "hidden" }}
+      className="bg-game-gradient relative flex w-full items-center justify-center"
+      style={{ height: "100vh", touchAction: "none" }}
     >
-      {/* Sân cỏ tỉ lệ dọc 2:3 (giống canvas 720x1080 trong game.html), letterbox 2 bên bằng nền trời-cỏ */}
-      <div
-        ref={fieldRef}
-        className="relative"
+      <canvas
+        ref={canvasRef}
+        width={720}
+        height={1080}
         style={{
-          width: "min(100vw, calc(100vh * 2 / 3))",
-          height: "min(100vh, calc(100vw * 3 / 2))",
-          overflow: "hidden",
-          background: "repeating-linear-gradient(180deg,#3c9448 0,#3c9448 120px,#46a552 120px,#46a552 240px)",
-          backgroundPositionY: st ? st.offset % 240 : 0,
+          height: "100vh",
+          maxWidth: "100vw",
+          touchAction: "none",
+          display: "block",
         }}
-        onTouchStart={onDown}
-        onTouchMove={onMove}
-        onTouchEnd={onUp}
-        onMouseDown={onDown}
-        onMouseMove={onMove}
-        onMouseUp={onUp}
-        onMouseLeave={onUp}
-      >
-        {/* Khung viền trắng bao quanh sân */}
+      />
+      <div className="pointer-events-none absolute top-3.5 right-0 left-0 flex justify-center gap-3.5">
         <div
-          className="pointer-events-none absolute"
-          style={{ inset: 20, border: "4px solid rgba(255,255,255,.55)" }}
-        />
-
-        {/* Vạch vôi + vòng tròn giữa sân cuộn xuống */}
-        {st &&
-          marks.map((y, i) => (
-            <Fragment key={"m" + i}>
-              <div className="absolute" style={{ left: 20, right: 20, top: y, height: 4, background: "rgba(255,255,255,.55)" }} />
-              <div
-                className="absolute rounded-full"
-                style={{
-                  left: "50%",
-                  top: y,
-                  width: 170,
-                  height: 170,
-                  transform: "translate(-50%,-50%)",
-                  border: "4px solid rgba(255,255,255,.55)",
-                }}
-              />
-            </Fragment>
-          ))}
-
-        {/* Vật phẩm */}
-        {ready &&
-          st &&
-          st.items.map((it) => (
-            <div
-              key={it.id}
-              className="absolute"
-              style={{
-                left: it.x,
-                top: it.y,
-                transform: "translate(-50%,-50%)",
-                fontSize: it.type === "ref" ? 52 : 44,
-                filter: "drop-shadow(0 3px 2px rgba(0,0,0,0.35))",
-              }}
-            >
-              {it.type === "beef" ? (
-                <img src={ICONS.beef} alt="beef" width={96} height={60} draggable={false} />
-              ) : (
-                ICONS[it.type]
-              )}
-            </div>
-          ))}
-
-        {/* Chú bò */}
-        {ready && st && (
-          <div
-            className="absolute"
-            style={{
-              left: st.cowX,
-              top: st.cowY,
-              transform: "translate(-50%,-50%)",
-              fontSize: 64,
-              filter: "drop-shadow(0 4px 3px rgba(0,0,0,0.4))",
-            }}
-          >
-            🐄
-          </div>
-        )}
-
-        {/* HUD nổi trên sân, căn giữa như game.html */}
-        <div className="absolute flex items-center justify-center gap-3.5" style={{ top: 14, left: 14, right: 14 }}>
-          <div
-            className="flex items-center gap-1.5 rounded-full border-4 py-1 pr-5 pl-2 text-2xl font-extrabold"
-            style={{
-              borderColor: "#21351f",
-              background: "#fff8e7",
-              color: "#2c7a37",
-              boxShadow: "0 4px 0 #21351f",
-            }}
-          >
-            <img src={ICONS.beef} alt="beef" width={40} height={25} />
-            {st ? st.score : 0}
-          </div>
-          <div
-            className="rounded-full border-4 px-5 py-1 text-2xl font-extrabold"
-            style={
-              st && st.timeLeft < 10
-                ? { borderColor: "#d63031", background: "#ffe1e0", color: "#d63031", boxShadow: "0 4px 0 #b0201f" }
-                : { borderColor: "#21351f", background: "#ffd54f", color: "#8a5a00", boxShadow: "0 4px 0 #21351f" }
-            }
-          >
-            ⏱ {Math.max(0, Math.ceil(st ? st.timeLeft : config.duration))}s
-          </div>
+          className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
+          style={{
+            borderColor: "#21351f",
+            background: "#fff8e7",
+            color: "#2c7a37",
+            boxShadow: "0 4px 0 #21351f",
+          }}
+        >
+          ⭐ {score}
         </div>
-
-        {/* Overlay đếm ngược / đang chuẩn bị */}
-        {(!ready || countdown > 0) && (
-          <div
-            className="absolute flex flex-col items-center justify-center text-white"
-            style={{ inset: 0, background: "rgba(0,0,0,0.55)" }}
-          >
-            {!ready ? (
-              <div
-                className="text-3xl font-extrabold"
-                style={{ textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)" }}
-              >
-                Đang chuẩn bị sân…
-              </div>
-            ) : (
-              <>
-                <div
-                  className="text-9xl leading-none font-extrabold"
-                  style={{
-                    color: "#ffd54f",
-                    textShadow: "0 4px 0 #8a5a00, 0 8px 20px rgba(0,0,0,.4)",
-                    animation: "pop-in .3s ease",
-                  }}
-                  key={countdown}
-                >
-                  {countdown}
-                </div>
-                <p
-                  className="mt-6 px-8 text-center text-xl font-semibold"
-                  style={{ textShadow: "0 2px 4px rgba(0,0,0,.4)" }}
-                >
-                  Kéo ngang để điều khiển bò 🐄
-                  <br />
-                  Ăn <img src={ICONS.beef} alt="beef" width={45} height={29} style={{ display: "inline", verticalAlign: "middle" }} /> lấy
-                  điểm — né ⚽ và 🧑‍⚖️ nhé!
-                </p>
-              </>
-            )}
-          </div>
-        )}
+        <div
+          className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
+          style={{
+            borderColor: "#21351f",
+            background: "#ffd54f",
+            color: "#8a5a00",
+            boxShadow: "0 4px 0 #21351f",
+          }}
+        >
+          {hudTime}
+        </div>
       </div>
     </div>
   );

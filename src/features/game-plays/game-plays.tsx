@@ -5,7 +5,7 @@ import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
 import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "./configs/game-v2";
 import CustomerForm from "./components/customer-form";
-import PlayGame from "./components/game-screen-v2";
+import PlayGame from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
 import { useNavigate } from "react-router-dom";
@@ -16,8 +16,11 @@ const GAME_SPEED_LABELS = Object.fromEntries(
 
 const MiniGames = () => {
   const navigate = useNavigate();
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.tutorial);
+
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
+
   const [customer, setCustomer] = useState<Customer | null>(null);
+
   const [outcome, setOutcome] = useState<GameOutcome | null>({
     playedSeconds: 60,
     result: "win",
