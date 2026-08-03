@@ -1,19 +1,12 @@
 import { useState } from "react";
-import { GAME_SPEED_OPTIONS, type GameSpeed } from "../game-configs/configs";
-import { getGameConfig } from "../game-configs/helpers";
 import GameConfigs from "../game-configs";
 import type { Store } from "@/types/store";
 import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
-import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "./configs/game";
 import CustomerForm from "./components/customer-form";
 import PlayGame from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
-
-const GAME_SPEED_LABELS = Object.fromEntries(
-  GAME_SPEED_OPTIONS.map(({ value, label }) => [value, label]),
-) as unknown as Record<GameSpeed, GameV2Config["gameSpeed"]>;
 
 const MiniGames = () => {
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
@@ -27,23 +20,6 @@ const MiniGames = () => {
     result: "win",
     score: 100,
   });
-
-  const buildGameV2Config = (): GameV2Config => {
-    const savedConfig = getGameConfig();
-    return {
-      ...DEFAULT_GAME_V2_CONFIG,
-      pointsPerGrain: savedConfig.pointsPerGrain,
-      pointsPerGrass: savedConfig.pointsPerGrass,
-      unlimitedTime: savedConfig.unlimitedTime,
-      gameSpeed: GAME_SPEED_LABELS[savedConfig.gameSpeed],
-      ...(savedConfig.timeLimit != null && {
-        timeLimit: savedConfig.timeLimit,
-      }),
-      ...(savedConfig.winningScore != null && {
-        winningScore: savedConfig.winningScore,
-      }),
-    };
-  };
 
   const startTutorial = (info: Customer) => {
     setCustomer(info);

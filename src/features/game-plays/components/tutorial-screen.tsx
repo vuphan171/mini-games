@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useCountdown } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
-import type { GameV2Config } from "../configs/game";
+import type { GameConfigs } from "../configs/game";
 import Grains from "@/assets/logos/grains.png";
 import CowRun from "@/assets/logos/cow-run.png";
 import Grass from "@/assets/logos/grass.png";
@@ -52,7 +52,7 @@ const HAZARDS = [
 ];
 
 interface Props {
-  config: GameV2Config;
+  config: GameConfigs;
   onStart: () => void;
 }
 
