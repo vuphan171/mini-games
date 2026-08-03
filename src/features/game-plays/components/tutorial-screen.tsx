@@ -22,23 +22,6 @@ const IMG_PROPS = {
   decoding: "sync",
 } as const;
 
-const SCORING_ITEMS = [
-  {
-    src: Grains,
-    alt: "Ngũ cốc",
-    width: 48,
-    height: 66,
-    label: "Ăn Ngũ Cốc\n+10 Điểm",
-  },
-  {
-    src: Grass,
-    alt: "Cỏ",
-    width: 63,
-    height: 40,
-    label: "Ăn Cỏ\n+10 Điểm",
-  },
-];
-
 const GIFTS = [
   { src: GiftSocks, alt: "Quà tặng vớ", label: "0 - 50 điểm" },
   { src: GiftKeyChain, alt: "Quà tặng móc khóa", label: "51 - 80 điểm" },
@@ -56,7 +39,7 @@ interface Props {
   onStart: () => void;
 }
 
-export default function TutorialScreen({ onStart }: Props) {
+export default function TutorialScreen({ config, onStart }: Props) {
   const [count, { startCountdown }] = useCountdown({
     countStart: COUNTDOWN_SECONDS,
     intervalMs: 1000,
@@ -69,6 +52,23 @@ export default function TutorialScreen({ onStart }: Props) {
   useEffect(() => {
     if (count === 0) onStart();
   }, [count, onStart]);
+
+  const SCORING_ITEMS = [
+    {
+      src: Grains,
+      alt: "Ngũ cốc",
+      width: 48,
+      height: 66,
+      label: `Ăn Ngũ Cốc\n+${config.pointsPerGrain} Điểm`,
+    },
+    {
+      src: Grass,
+      alt: "Cỏ",
+      width: 63,
+      height: 40,
+      label: `Ăn Cỏ\n+${config.pointsPerGrass} Điểm`,
+    },
+  ];
 
   const renderLeft = () => (
     <section className="flex-1 rounded-2xl border border-brand-tertiary">

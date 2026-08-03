@@ -13,7 +13,6 @@ import { Switch } from "@/components/ui/switch";
 import APIService from "@/services/api-service";
 import type { Store, UpdateStorePayload } from "@/types/store";
 import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
-import { saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,7 +20,7 @@ import { Label } from "@/components/ui/label";
 
 type Props = {
   store: Store;
-  onDone: () => void;
+  onDone: (data: SettingsFormValues) => void;
 };
 
 const AdminConfigs = ({ store, onDone }: Props) => {
@@ -62,9 +61,8 @@ const AdminConfigs = ({ store, onDone }: Props) => {
       return;
     }
 
-    saveGameConfig(data);
     toast.success("Đã lưu cài đặt");
-    onDone();
+    onDone(data);
   };
 
   return (

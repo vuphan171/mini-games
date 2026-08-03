@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { ensureAudioContext } from "@/lib/audio";
 import APIService from "@/services/api-service";
 import { useCustomerSchema, TCustomerSchema } from "./schema";
@@ -23,7 +24,7 @@ import { useEffect } from "react";
 import type { Store } from "@/types/store";
 
 type Props = {
-  onStart: (info: Customer) => void;
+  onStart: (customer: Customer, store: Store) => void;
   onOpenConfig: (store: Store) => void;
 };
 
@@ -55,9 +56,32 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
     });
   }, [reset, stores]);
 
-  const onSubmit = (data: TCustomerSchema) => {
-    ensureAudioContext();
-    onStart(data);
+  const onSubmit = async (data: TCustomerSchema) => {
+    try {
+      const store = stores.find((s) => s.storeID === data.store);
+
+      if (!store) return;
+
+      const success = await APIService.createCustomer({
+        storeID: store.storeID,
+        customerName: data.name,
+        email: data.email,
+        phone: data.phone,
+        score: 0,
+        playDuration: 0,
+        result: "New",
+      });
+
+      if (!success) {
+        toast.error("Lưu thông tin khách hàng thất bại");
+        return;
+      }
+
+      ensureAudioContext();
+      onStart(data, store);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -228,7 +252,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
             type="submit"
             size="2xl"
             variant="game"
-            disabled={!formState.isValid}
+            disabled={!formState.isValid || formState.isSubmitting}
             className="mt-10 w-full"
           >
             BẮT ĐẦU CHƠI

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { GameOutcome, GameResultKind } from "../types";
-import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "../configs/game";
+import type { GameConfigs } from "../configs/game";
 
 // Bản sao 1:1 logic + canvas render từ docs/game.html (bản gốc "Siêu Bò Úc Sút Bóng")
 
@@ -60,11 +60,11 @@ const getGlyphCenterOffset = (font: string, glyph: string) => {
   }
 };
 
-const SPEED_MULT: Record<GameV2Config["gameSpeed"], number> = {
+const SPEED_MULT: Record<GameConfigs["gameSpeed"], number> = {
   Slow: 0.7,
   Normal: 1,
   Fast: 1.4,
-  "Very Fast": 1.8,
+  veryFast: 1.8,
 };
 
 type ItemType = "grain" | "grass";
@@ -88,15 +88,12 @@ interface GameState {
 }
 
 interface GameScreenV2Props {
-  config?: Partial<GameV2Config>;
+  config: GameConfigs;
   onFinish: (result: GameOutcome) => void;
 }
 
 export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
-  const cfg = useRef<GameV2Config>({
-    ...DEFAULT_GAME_V2_CONFIG,
-    ...config,
-  }).current;
+  const cfg = useRef<GameConfigs>(config).current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameState | null>(null);
   const rafId = useRef(0);

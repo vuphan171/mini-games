@@ -1,6 +1,7 @@
 import appApi from "@/api/axios-client";
 import { ApiResponse } from "@/types/api";
 import type { Store, UpdateStorePayload } from "@/types/store";
+import type { CreateCustomerPayload } from "@/types/customer";
 import { LoggerService } from "./log-service";
 
 const APIService = {
@@ -21,6 +22,16 @@ const APIService = {
   ): Promise<boolean> => {
     try {
       await appApi.put(`stores/${storeID}`, payload);
+      return true;
+    } catch (error) {
+      LoggerService.logError(error);
+      return false;
+    }
+  },
+
+  createCustomer: async (payload: CreateCustomerPayload): Promise<boolean> => {
+    try {
+      await appApi.post("customers", payload);
       return true;
     } catch (error) {
       LoggerService.logError(error);
