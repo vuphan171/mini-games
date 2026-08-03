@@ -20,10 +20,11 @@ import { IconSetting } from "@/assets";
 import CowHoldingBall from "@/assets/logos/cow-holding-ball.png";
 import AppLogo from "@/assets/logos/app-logo.png";
 import { useEffect } from "react";
+import type { Store } from "@/types/store";
 
 type Props = {
   onStart: (info: Customer) => void;
-  onOpenConfig: (storeId: string) => void;
+  onOpenConfig: (store: Store) => void;
 };
 
 const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
@@ -68,7 +69,9 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         onClick={() => {
           const storeId = getValues("store");
           if (!storeId) return;
-          onOpenConfig(storeId);
+          const store = stores.find((s) => s.storeID === storeId);
+          if (!store) return;
+          onOpenConfig(store);
         }}
       >
         <IconSetting className="text-white size-6" />

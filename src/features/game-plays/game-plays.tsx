@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { GAME_SPEED_OPTIONS, type GameSpeed } from "../game-configs/configs";
 import { getGameConfig } from "../game-configs/helpers";
+import GameConfigs from "../game-configs";
+import type { Store } from "@/types/store";
 import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
 import { DEFAULT_GAME_V2_CONFIG, type GameV2Config } from "./configs/game";
@@ -8,18 +10,17 @@ import CustomerForm from "./components/customer-form";
 import PlayGame from "./components/game-screen";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
-import { useNavigate } from "react-router-dom";
 
 const GAME_SPEED_LABELS = Object.fromEntries(
   GAME_SPEED_OPTIONS.map(({ value, label }) => [value, label]),
 ) as unknown as Record<GameSpeed, GameV2Config["gameSpeed"]>;
 
 const MiniGames = () => {
-  const navigate = useNavigate();
-
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
+
+  const [configStore, setConfigStore] = useState<Store | null>(null);
 
   const [outcome, setOutcome] = useState<GameOutcome | null>({
     playedSeconds: 60,
@@ -27,7 +28,7 @@ const MiniGames = () => {
     score: 100,
   });
 
-  const gameV2Config = useMemo<GameV2Config>(() => {
+  const buildGameV2Config = (): GameV2Config => {
     const savedConfig = getGameConfig();
     return {
       ...DEFAULT_GAME_V2_CONFIG,
@@ -42,7 +43,7 @@ const MiniGames = () => {
         winningScore: savedConfig.winningScore,
       }),
     };
-  }, []);
+  };
 
   const startTutorial = (info: Customer) => {
     setCustomer(info);
@@ -64,16 +65,23 @@ const MiniGames = () => {
       {screen === GAME_SCREENS.form && (
         <CustomerForm
           onStart={startTutorial}
-          onOpenConfig={(storeId) => {
-            navigate(`/configs/${storeId}`);
+          onOpenConfig={(store) => {
+            setConfigStore(store);
+            setScreen(GAME_SCREENS.config);
           }}
         />
       )}
+      {screen === GAME_SCREENS.config && configStore && (
+        <GameConfigs
+          store={configStore}
+          onDone={() => setScreen(GAME_SCREENS.form)}
+        />
+      )}
       {screen === GAME_SCREENS.tutorial && (
-        <TutorialScreen config={gameV2Config} onStart={startGame} />
+        <TutorialScreen config={buildGameV2Config()} onStart={startGame} />
       )}
       {screen === GAME_SCREENS.game && (
-        <PlayGame config={gameV2Config} onFinish={finishGame} />
+        <PlayGame config={buildGameV2Config()} onFinish={finishGame} />
       )}
       {screen === GAME_SCREENS.result && outcome && (
         <ResultScreen

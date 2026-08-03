@@ -1,3 +1,5 @@
+import { GameSpeed } from "@/features/game-configs/configs";
+
 export interface Store {
   storeID: string;
   storeType: string;
@@ -9,7 +11,7 @@ export interface Store {
   unlimitedTime: boolean;
   timeLimit: number;
   winningScore: number | null;
-  gameSpeed: string;
+  gameSpeed: GameSpeed;
   lastGamePlay: string | null;
   _rowIndex: number;
 }
@@ -21,4 +23,5 @@ export interface UpdateStorePayload {
   timeLimit?: number;
   winningScore?: number;
   gameSpeed: string;
+  storeName: string;
 }

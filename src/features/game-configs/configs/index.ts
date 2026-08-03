@@ -1,9 +1,9 @@
 import { SettingsFormValues } from "../schema";
 
 export const GameSpeeds = {
-  slow: "slow",
-  normal: "normal",
-  fast: "fast",
+  slow: "Slow",
+  normal: "Normal",
+  fast: "Fast",
   veryFast: "veryFast",
 } as const;
 

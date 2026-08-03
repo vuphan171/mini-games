@@ -1,5 +1,6 @@
 const GAME_SCREENS = {
   form: "form",
+  config: "config",
   tutorial: "tutorial",
   game: "game",
   result: "result",

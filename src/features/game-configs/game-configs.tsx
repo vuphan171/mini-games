@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,19 +11,20 @@ import {
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import APIService from "@/services/api-service";
-import type { UpdateStorePayload } from "@/types/store";
-import { GAME_SPEED_OPTIONS, DEFAULT_GAME_CONFIG } from "./configs";
-import { getGameConfig, saveGameConfig } from "./helpers";
+import type { Store, UpdateStorePayload } from "@/types/store";
+import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
+import { saveGameConfig } from "./helpers";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-const AdminConfigs = () => {
-  const { store_id } = useParams();
+type Props = {
+  store: Store;
+  onDone: () => void;
+};
 
-  const navigate = useNavigate();
-
+const AdminConfigs = ({ store, onDone }: Props) => {
   const {
     control,
     handleSubmit,
@@ -32,15 +32,21 @@ const AdminConfigs = () => {
     formState: { isSubmitting },
   } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: getGameConfig() ?? DEFAULT_GAME_CONFIG,
+    defaultValues: {
+      gameSpeed: store.gameSpeed || GameSpeeds.normal,
+      pointsPerGrain: store?.pointsPerGrain || 10,
+      pointsPerGrass: store?.pointsPerGrass || 10,
+      timeLimit: store?.timeLimit || 15,
+      unlimitedTime: store?.unlimitedTime || false,
+      winningScore: store?.winningScore || 100,
+    },
   });
 
   const unlimitedTime = watch("unlimitedTime");
 
   const onSubmit = async (data: SettingsFormValues) => {
-    if (!store_id) return;
-
     const payload: UpdateStorePayload = {
+      storeName: store?.storeName || "",
       pointsPerGrain: data.pointsPerGrain,
       pointsPerGrass: data.pointsPerGrass,
       unlimitedTime: data.unlimitedTime,
@@ -49,7 +55,7 @@ const AdminConfigs = () => {
       gameSpeed: data.gameSpeed,
     };
 
-    const success = await APIService.updateStore(store_id, payload);
+    const success = await APIService.updateStore(store.storeID, payload);
 
     if (!success) {
       toast.error("Lưu cài đặt thất bại");
@@ -58,7 +64,7 @@ const AdminConfigs = () => {
 
     saveGameConfig(data);
     toast.success("Đã lưu cài đặt");
-    navigate("/");
+    onDone();
   };
 
   return (
