@@ -16,9 +16,13 @@ const GAME_SPEED_LABELS = Object.fromEntries(
 
 const MiniGames = () => {
   const navigate = useNavigate();
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.tutorial);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [outcome, setOutcome] = useState<GameOutcome | null>(null);
+  const [outcome, setOutcome] = useState<GameOutcome | null>({
+    playedSeconds: 60,
+    result: "win",
+    score: 100,
+  });
 
   const gameV2Config = useMemo<GameV2Config>(() => {
     const savedConfig = getGameConfig();
@@ -71,7 +75,9 @@ const MiniGames = () => {
       {screen === GAME_SCREENS.result && outcome && (
         <ResultScreen
           outcome={outcome}
-          onDone={() => setScreen(GAME_SCREENS.form)}
+          onDone={() => {
+            // setScreen(GAME_SCREENS.form);
+          }}
         />
       )}
     </div>

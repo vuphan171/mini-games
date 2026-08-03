@@ -1,14 +1,19 @@
-import { Fragment, useEffect, useState } from "react";
-import { REWARD_TIERS } from "../configs/reward-tiers";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+
 import type { GameV2Config } from "../configs/game-v2";
+import Grains from "@/assets/logos/grains.png";
+import Grass from "@/assets/logos/grass.png";
+import Virus from "@/assets/logos/virus.png";
+import Referee from "@/assets/logos/referee.png";
+import Vaccine from "@/assets/logos/vaccine.png";
 
 interface TutorialScreenProps {
   config: GameV2Config;
   onStart: () => void;
 }
 
-const TUTORIAL_SECONDS = 30;
+const TUTORIAL_SECONDS = 3000;
 
 export default function TutorialScreen({
   config,
@@ -25,102 +30,117 @@ export default function TutorialScreen({
     if (secondsLeft <= 0) onStart();
   }, [secondsLeft, onStart]);
 
+  const renderRight = () => {
+    return (
+      <div className="flex-1 border border-danger rounded-2xl">
+        <div className="bg-danger p-3 rounded-t-2xl">
+          <p className="text-xl text-white text-center font-semibold uppercase">
+            Chướng ngại Vật nguy hiểm
+          </p>
+        </div>
+        <div className="px-3 py-5">
+          <div className="flex items-center gap-x-12 mx-auto justify-center">
+            <img
+              width={56}
+              height={56}
+              src={Virus}
+              alt="Virus"
+              fetchPriority="high"
+              loading="eager"
+              decoding="sync"
+            />
+            <img
+              width={56}
+              height={56}
+              src={Referee}
+              alt="Referee"
+              fetchPriority="high"
+              loading="eager"
+              decoding="sync"
+            />
+            <img
+              width={56}
+              height={56}
+              src={Vaccine}
+              alt="Vaccine"
+              fetchPriority="high"
+              loading="eager"
+              decoding="sync"
+            />
+          </div>
+          <p className="mt-6 text-lg text-center font-semibold">
+            Chú ý:{" "}
+            <span className="font-normal">
+              Bạn sẽ không thể dành chiến thắng nếu để siêu bò va chạm với các
+              chướng ngại nguy hiểm.
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
-      <div className="flex w-full max-w-xl flex-col gap-3.5 py-7">
-        <div className="flex items-center justify-between gap-3">
-          <h1
-            className="text-4xl font-extrabold text-white"
-            style={{
-              textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)",
-            }}
-          >
-            📖 LUẬT CHƠI
-          </h1>
-          <div
-            className="rounded-full border-4 px-5 py-0.5 text-2xl font-extrabold"
-            style={{
-              borderColor: "#21351f",
-              background: "#ffd54f",
-              color: "#8a5a00",
-              boxShadow: "0 4px 0 #21351f",
-            }}
-          >
-            {Math.max(secondsLeft, 0)}s
+    <div className="relative min-h-dvh flex flex-col w-full items-center justify-center overflow-hidden p-6 bg-black/50">
+      <p className="text-white text-xl font-bold">Bắt đầu sau</p>
+      <p className="text-white text-6xl font-bold">{secondsLeft}s</p>
+      <Button
+        type="submit"
+        size="2xl"
+        variant="game"
+        className="mt-6 w-fit px-10"
+      >
+        CHƠI NGAY
+      </Button>
+      <div className="flex w-full max-w-xl md:max-w-2xl lg:max-w-5xl mt-6 flex-col rounded-3xl p-6 bg-white shadow-card md:px-10">
+        <p className="text-2xl text-center font-bold text-foreground mb-6">
+          HƯỚNG DẪN CÁCH CHƠI
+        </p>
+
+        <div className="flex flex-col lg:flex-row gap-5">
+          <div className="flex-1 border border-brand-tertiary rounded-2xl">
+            <div className="bg-brand-tertiary p-3 rounded-t-2xl">
+              <p className="text-xl text-white text-center font-semibold">
+                Vật phẩm tích điểm & Quà Tặng
+              </p>
+            </div>
+            <div className="p-3">
+              <div className="flex items-center gap-4">
+                <img
+                  width={48}
+                  height={66}
+                  src={Grains}
+                  alt="Grains"
+                  fetchPriority="high"
+                  loading="eager"
+                  decoding="sync"
+                />
+                <p className="text-foreground text-lg leading-snug font-bold">
+                  Ăn Ngũ Cốc <br /> +10 Điểm
+                </p>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <img
+                  width={63}
+                  height={40}
+                  src={Grass}
+                  alt="Grass"
+                  fetchPriority="high"
+                  loading="eager"
+                  decoding="sync"
+                />
+                <p className="text-foreground text-lg leading-snug font-bold">
+                  Ăn Cỏ <br /> +10 Điểm
+                </p>
+              </div>
+            </div>
           </div>
+
+          {renderRight()}
         </div>
 
-        <div
-          className="flex flex-col gap-3.5 rounded-[22px] border-4 p-6"
-          style={{
-            borderColor: "#21351f",
-            background: "#fff8e7",
-            boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
-          }}
-        >
-          <div className="flex flex-col gap-3 text-base leading-snug text-[#21351f]">
-            <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">👆</span>
-              <span>
-                Chạm và kéo <b>trái / phải</b> để điều khiển chú bò. Thả tay —
-                bò dừng ngay!
-              </span>
-            </div>
-            <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">🌾🌿</span>
-              <span>
-                Ăn <b>lúa</b> +{config.pointsPerGrain} điểm, <b>cỏ</b> +
-                {config.pointsPerGrass} điểm.
-              </span>
-            </div>
-            <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">💉🦠🧑‍⚖️</span>
-              <span>
-                Né <b>vắc-xin, vi-rút, trọng tài</b> — đụng phải là thua ngay!
-              </span>
-            </div>
-            <div className="flex items-center gap-3.5">
-              <span className="shrink-0 text-3xl">⏱️</span>
-              <span>
-                {config.unlimitedTime ? (
-                  <>
-                    Đạt <b>{config.winningScore} điểm</b> là THẮNG!
-                  </>
-                ) : (
-                  <>
-                    Trụ vững hết <b>{config.timeLimit} giây</b> là THẮNG!
-                  </>
-                )}
-              </span>
-            </div>
-          </div>
-
-          <div
-            className="rounded-2xl border-2 p-4"
-            style={{ borderColor: "#2c7a37", background: "#e9f5db" }}
-          >
-            <p className="mb-1.5 text-lg font-extrabold text-[#2c7a37]">
-              🎁 MỐC ĐIỂM ĐỔI QUÀ
-            </p>
-            <div
-              className="grid gap-x-4 gap-y-1.5"
-              style={{ gridTemplateColumns: "auto 1fr" }}
-            >
-              {REWARD_TIERS.map((tier) => (
-                <Fragment key={tier.label}>
-                  <b className="text-sm text-[#21351f]">{tier.label}</b>
-                  <span className="text-sm text-[#21351f]">{tier.reward}</span>
-                </Fragment>
-              ))}
-            </div>
-            <p className="mt-1.5 text-xs" style={{ color: "#7a8a72" }}>
-              (Bảng quà minh họa — PG đối chiếu điểm và phát quà thủ công)
-            </p>
-          </div>
-        </div>
-
-        <Button variant="game" size="2xl" type="button" onClick={onStart}>
-          ⏩ BỎ QUA → CHƠI NGAY
+        <Button type="submit" size="2xl" variant="game" className="mt-10 w-fit">
+          CHƠI NGAY
         </Button>
       </div>
     </div>

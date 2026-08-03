@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import CowWin from "@/assets/logos/cow-win.png";
 import type { GameOutcome } from "../types";
 
 interface ResultScreenProps {
@@ -23,56 +24,31 @@ export default function ResultScreen({ outcome, onDone }: ResultScreenProps) {
   }, [countdown, onDone]);
 
   return (
-    <div className="bg-game-gradient relative flex min-h-dvh w-full items-center justify-center overflow-hidden p-6">
-      <div
-        className="flex w-full max-w-md flex-col items-center gap-4 py-7"
-        style={{ animation: "pop-in .4s ease" }}
-      >
-        <div
-          className="text-8xl leading-none"
-          style={{ animation: "spin-star 1.2s ease" }}
-        >
-          {win ? "🏆" : "😵"}
+    <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
+      <div className="flex w-full max-w-xl md:max-w-2xl mt-20 md:mt-0 flex-col items-center rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
+        <div className="mb-6">
+          <img
+            width={175}
+            height={175}
+            src={CowWin}
+            alt="Cow Holding Ball"
+            fetchPriority="high"
+            loading="eager"
+            decoding="sync"
+          />
         </div>
 
-        <h1
-          className="text-6xl leading-none font-extrabold text-white"
-          style={{
-            textShadow: `0 4px 0 ${win ? "#1a4d21" : "#8b1e1e"}, 0 8px 20px rgba(0,0,0,.35)`,
-          }}
-        >
-          {win ? "THẮNG!" : "THUA RỒI!"}
-        </h1>
+        <p className="text-win text-6xl font-extrabold">CHIẾN THẮNG!</p>
 
-        {win && (
-          <div
-            className="flex flex-col items-center gap-1 rounded-[22px] border-4 px-10 py-5"
-            style={{
-              borderColor: "#21351f",
-              background: "#fff8e7",
-              boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
-            }}
-          >
-            <p className="text-[15px] font-bold tracking-wide text-[#7a8a72]">
-              ĐIỂM ĐẠT ĐƯỢC
-            </p>
-            <p className="text-8xl leading-none font-extrabold text-[#2c7a37]">
-              {outcome.score}
-            </p>
-            <p className="text-sm text-[#7a8a72]">
-              Đưa màn hình này cho PG để nhận quà 🎁
-            </p>
-          </div>
-        )}
+        <p className="text-9xl text-brand-tertiary font-extrabold tracking-normal">
+          50
+        </p>
 
-        <Button
-          type="button"
-          variant="game"
-          size="2xl"
-          className="w-full"
-          onClick={onDone}
-        >
-          LƯỢT TIẾP THEO ({Math.max(countdown, 0)}s)
+        <p className="text-foreground text-3xl font-semibold uppercase">
+          ĐIỂM BẠN ĐÃ ĐẠT ĐƯỢC
+        </p>
+        <Button type="submit" size="2xl" variant="game" className="mt-6 w-full">
+          LƯỢT TIẾP THEO 5s
         </Button>
       </div>
     </div>
