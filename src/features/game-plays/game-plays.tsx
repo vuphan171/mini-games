@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import GameConfigs from "../game-configs";
 import type { Store } from "@/types/store";
@@ -5,7 +6,7 @@ import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
 import type { GameConfigs as GameConfigsShape } from "./configs/game";
 import CustomerForm from "./components/customer-form";
-import PlayGame from "./components/game-screen";
+import PlayGame from "./components/game-screen/game-screen";
 import ResultScreen from "./components/result-screen";
 import TutorialScreen from "./components/tutorial-screen";
 
@@ -18,12 +19,30 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   gameSpeed: store.gameSpeed,
 });
 
+const MOCK_STORE = {
+  storeID: "FOODSERVICE4",
+  storeType: "FOOD SERVICE",
+  location: "Hồ Chí Minh",
+  system: "",
+  storeName: "Heart of Darkness Saigon Taproom",
+  pointsPerGrain: 20,
+  pointsPerGrass: 20,
+  unlimitedTime: true,
+  timeLimit: 60,
+  winningScore: null,
+  gameSpeed: "Fast",
+  lastGamePlay: "2026-08-03 22:50:33",
+  _rowIndex: 28,
+} as any;
+
 const MiniGames = () => {
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.game);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(MOCK_STORE);
+
+  console.log("selectedStore", selectedStore);
 
   const [outcome, setOutcome] = useState<GameOutcome | null>({
     playedSeconds: 60,

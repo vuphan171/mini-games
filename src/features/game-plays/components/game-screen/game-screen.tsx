@@ -1,70 +1,71 @@
 import { useEffect, useRef, useState } from "react";
-import type { GameOutcome, GameResultKind } from "../types";
-import type { GameConfigs } from "../configs/game";
+import type { GameOutcome, GameResultKind } from "../../types";
+import type { GameConfigs } from "../../configs/game";
+import ScoreBadge from "./components/score-badge";
+import TimeBadge from "./components/time-badge";
+import Grains from "@/assets/logos/grains.png";
+import Grass from "@/assets/logos/grass.png";
+import Virus from "@/assets/logos/virus.png";
+import Referee from "@/assets/logos/referee.png";
+import Vaccine from "@/assets/logos/vaccine.png";
+import CowRun from "@/assets/logos/cow-run.png";
 
-// Bản sao 1:1 logic + canvas render từ docs/game.html (bản gốc "Siêu Bò Úc Sút Bóng")
+const ITEM_HEIGHT = 57;
+const COW_HEIGHT = 86;
 
-// TextMetrics.actualBoundingBox* không đáng tin cậy với emoji màu/ZWJ trên Safari
-// (thường trả về 0), nên canh giữa bằng cách quét pixel thực tế đã render, thay vì
-// dựa vào font metrics — chính xác trên mọi trình duyệt vì đo trên kết quả vẽ thật.
-const glyphOffsetCache = new Map<string, { x: number; y: number }>();
-
-const NO_OFFSET = { x: 0, y: 0 };
-
-// Lỡ có gì bất thường (getContext trả về null, getImageData bị chặn...) thì
-// trả về NO_OFFSET để fillText vẫn vẽ bình thường (chỉ mất phần canh giữa tinh
-// chỉnh), không làm crash cả vòng lặp vẽ game.
-const getGlyphCenterOffset = (font: string, glyph: string) => {
-  const cacheKey = `${font}::${glyph}`;
-  const cached = glyphOffsetCache.get(cacheKey);
-  if (cached) return cached;
-
-  try {
-    const size = 140;
-    const center = size / 2;
-    const off = document.createElement("canvas");
-    off.width = size;
-    off.height = size;
-    const octx = off.getContext("2d");
-    if (!octx) return NO_OFFSET;
-
-    octx.font = font;
-    octx.textAlign = "center";
-    octx.textBaseline = "middle";
-    octx.fillText(glyph, center, center);
-
-    const { data } = octx.getImageData(0, 0, size, size);
-    let minX = size;
-    let maxX = -1;
-    let minY = size;
-    let maxY = -1;
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        if (data[(y * size + x) * 4 + 3] > 10) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    const offset =
-      maxX >= minX
-        ? { x: center - (minX + maxX) / 2, y: center - (minY + maxY) / 2 }
-        : NO_OFFSET;
-    glyphOffsetCache.set(cacheKey, offset);
-    return offset;
-  } catch {
-    return NO_OFFSET;
-  }
+const loadImage = (src: string) => {
+  const img = new Image();
+  img.src = src;
+  return img;
 };
+
+const drawCenteredByHeight = (
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  cx: number,
+  cy: number,
+  height: number,
+) => {
+  const naturalW = img.naturalWidth || height;
+  const naturalH = img.naturalHeight || height;
+  const scale = height / naturalH;
+  const w = naturalW * scale;
+  ctx.drawImage(img, cx - w / 2, cy - height / 2, w, height);
+};
+
+const ITEM_IMAGES: Record<ItemType, HTMLImageElement> = {
+  grain: loadImage(Grains),
+  grass: loadImage(Grass),
+};
+
+const OBS_IMAGES: Record<ObsType, HTMLImageElement> = {
+  vaccine: loadImage(Vaccine),
+  virus: loadImage(Virus),
+  ref: loadImage(Referee),
+};
+
+const COW_IMAGE = loadImage(CowRun);
 
 const SPEED_MULT: Record<GameConfigs["gameSpeed"], number> = {
   Slow: 0.7,
   Normal: 1,
   Fast: 1.4,
   veryFast: 1.8,
+};
+
+const CANVAS_HEIGHT = 1080;
+const COW_Y_RATIO = 0.8;
+const COW_Y = CANVAS_HEIGHT * COW_Y_RATIO;
+
+const GROUND_ANCHOR_Y = COW_Y + 40;
+
+const getGroundAnchorPercent = (boxWidth: number, boxHeight: number) => {
+  if (boxWidth <= 0 || boxHeight <= 0) return 100;
+  const scale = Math.max(boxWidth / 720, boxHeight / 1080);
+  const overflow = boxHeight - 1080 * scale;
+  if (Math.abs(overflow) < 0.01) return 100;
+  const fraction = (boxHeight - GROUND_ANCHOR_Y * scale) / overflow;
+  return Math.min(100, Math.max(0, fraction * 100));
 };
 
 type ItemType = "grain" | "grass";
@@ -87,12 +88,12 @@ interface GameState {
   over: boolean;
 }
 
-interface GameScreenV2Props {
+interface Props {
   config: GameConfigs;
   onFinish: (result: GameOutcome) => void;
 }
 
-export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
+const GameScreen = ({ config, onFinish }: Props) => {
   const cfg = useRef<GameConfigs>(config).current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<GameState | null>(null);
@@ -105,6 +106,22 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
   const [timeLeft, setTimeLeft] = useState(
     cfg.unlimitedTime ? 0 : cfg.timeLimit,
   );
+  const [groundAnchorPercent, setGroundAnchorPercent] = useState(100);
+
+  useEffect(() => {
+    const cv = canvasRef.current;
+    if (!cv) return;
+
+    const updateGroundAnchor = () => {
+      const r = cv.getBoundingClientRect();
+      setGroundAnchorPercent(getGroundAnchorPercent(r.width, r.height));
+    };
+
+    updateGroundAnchor();
+    const ro = new ResizeObserver(updateGroundAnchor);
+    ro.observe(cv);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -145,75 +162,42 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
 
     const setTarget = (clientX: number) => {
       const r = cv.getBoundingClientRect();
-      g.targetX = ((clientX - r.left) / r.width) * 720;
+      const coverScale = Math.max(r.width / 720, r.height / 1080);
+      const offsetX = (r.width - 720 * coverScale) / 2;
+      g.targetX = (clientX - r.left - offsetX) / coverScale;
     };
+
     const onPointerDown = (e: PointerEvent) => {
       g.dragging = true;
       cv.setPointerCapture(e.pointerId);
       setTarget(e.clientX);
     };
+
     const onPointerMove = (e: PointerEvent) => {
       if (g.dragging) setTarget(e.clientX);
     };
+
     const onPointerUp = () => {
       g.dragging = false;
       g.targetX = g.cowX;
     };
+
     cv.addEventListener("pointerdown", onPointerDown);
     cv.addEventListener("pointermove", onPointerMove);
     cv.addEventListener("pointerup", onPointerUp);
     cv.addEventListener("pointercancel", onPointerUp);
 
     const draw = () => {
-      for (let i = 0; i < 9; i++) {
-        ctx.fillStyle = i % 2 ? "#3c9448" : "#46a552";
-        ctx.fillRect(0, i * 120, 720, 120);
-      }
-      ctx.strokeStyle = "rgba(255,255,255,.55)";
-      ctx.lineWidth = 4;
-      ctx.strokeRect(30, 30, 660, 1020);
-      ctx.beginPath();
-      ctx.arc(360, 540, 90, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(30, 540);
-      ctx.lineTo(690, 540);
-      ctx.stroke();
+      ctx.clearRect(0, 0, 720, 1080);
 
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
       for (const en of g.entities) {
-        ctx.font = "52px serif";
-        const glyph =
-          en.kind === "item"
-            ? en.type === "grain"
-              ? "🌾"
-              : "🌿"
-            : en.type === "vaccine"
-              ? "💉"
-              : en.type === "virus"
-                ? "🦠"
-                : "🧑‍⚖️";
+        const img =
+          en.kind === "item" ? ITEM_IMAGES[en.type] : OBS_IMAGES[en.type];
 
-        ctx.beginPath();
-        ctx.arc(en.x, en.y, 34, 0, Math.PI * 2);
-        if (en.kind === "item") {
-          ctx.fillStyle = "rgba(21,128,61,.55)";
-          ctx.strokeStyle = "rgba(20,83,45,1)";
-        } else {
-          ctx.fillStyle = "rgba(239,68,68,.55)";
-          ctx.strokeStyle = "rgba(127,29,29,1)";
-        }
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        ctx.fillStyle = "#000";
-        const offset = getGlyphCenterOffset(ctx.font, glyph);
-        ctx.fillText(glyph, en.x + offset.x, en.y + offset.y);
+        drawCenteredByHeight(ctx, img, en.x, en.y, ITEM_HEIGHT);
       }
-      ctx.font = "84px serif";
-      ctx.fillText("🐮", g.cowX, 940);
+
+      drawCenteredByHeight(ctx, COW_IMAGE, g.cowX, COW_Y, COW_HEIGHT);
     };
 
     const tick = (now: number) => {
@@ -249,7 +233,7 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
         });
       }
 
-      const cowY = 940;
+      const cowY = COW_Y;
       const fall = 260 * sp * dt;
       let gained = 0;
       for (const en of g.entities) {
@@ -281,6 +265,7 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
       }
 
       const elapsed = (now - g.startTime) / 1000;
+
       if (!cfg.unlimitedTime) {
         const left = Math.max(0, Math.ceil(cfg.timeLimit - elapsed));
         setTimeLeft((prev) => (prev !== left ? left : prev));
@@ -315,44 +300,28 @@ export default function GameScreenV2({ config, onFinish }: GameScreenV2Props) {
 
   return (
     <div
-      className="bg-game-gradient relative flex w-full items-center justify-center"
-      style={{ height: "100vh", touchAction: "none" }}
+      className="relative flex w-full items-center justify-center"
+      style={{ height: "100dvh", touchAction: "none" }}
     >
       <canvas
         ref={canvasRef}
         width={720}
         height={1080}
         style={{
-          height: "100vh",
-          maxWidth: "100vw",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: `center ${groundAnchorPercent}%`,
           touchAction: "none",
           display: "block",
         }}
       />
       <div className="pointer-events-none absolute top-3.5 right-0 left-0 flex justify-center gap-3.5">
-        <div
-          className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
-          style={{
-            borderColor: "#21351f",
-            background: "#fff8e7",
-            color: "#2c7a37",
-            boxShadow: "0 4px 0 #21351f",
-          }}
-        >
-          ⭐ {score}
-        </div>
-        <div
-          className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
-          style={{
-            borderColor: "#21351f",
-            background: "#ffd54f",
-            color: "#8a5a00",
-            boxShadow: "0 4px 0 #21351f",
-          }}
-        >
-          {hudTime}
-        </div>
+        <ScoreBadge score={score} />
+        <TimeBadge label={hudTime} />
       </div>
     </div>
   );
-}
+};
+
+export default GameScreen;
