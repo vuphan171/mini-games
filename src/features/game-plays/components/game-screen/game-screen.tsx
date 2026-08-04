@@ -9,14 +9,14 @@ import Grass from "@/assets/logos/grass.png";
 import Virus from "@/assets/logos/virus.png";
 import Referee from "@/assets/logos/referee.png";
 import Vaccine from "@/assets/logos/vaccine.png";
-import Coin from "@/assets/logos/coin.png";
+import Coin from "@/assets/logos/ic-coin.png";
 import CowRunAnimation from "@/assets/logos/cow-run-animation.gif";
 import { GifPlayer } from "./gif-player";
 
 const ITEM_HEIGHT = 70;
 const COW_HEIGHT = 116;
 const COIN_SIZE = 38;
-const COIN_FLY_MS = 1150;
+const COIN_FLY_MS = 1500;
 
 const COIN_SCALE_KEYFRAMES: Keyframe[] = [
   { transform: "scale(0.4)", offset: 0 },
@@ -28,6 +28,35 @@ const loadImage = (src: string) => {
   const img = new Image();
   img.src = src;
   return img;
+};
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const createCoinNode = (points: number): SVGSVGElement => {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 100 100");
+
+  const image = document.createElementNS(SVG_NS, "image");
+  image.setAttribute("href", Coin);
+  image.setAttribute("width", "100");
+  image.setAttribute("height", "100");
+  svg.appendChild(image);
+
+  const text = document.createElementNS(SVG_NS, "text");
+  text.setAttribute("x", "50");
+  text.setAttribute("y", "54");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("dominant-baseline", "middle");
+  text.setAttribute("font-size", "40");
+  text.setAttribute("font-weight", "900");
+  text.setAttribute("fill", "#ffffff");
+  text.setAttribute("stroke", "#5b3a00");
+  text.setAttribute("stroke-width", "2");
+  text.setAttribute("paint-order", "stroke");
+  text.textContent = `+${points}`;
+  svg.appendChild(text);
+
+  return svg;
 };
 
 const drawCenteredByHeight = (
@@ -235,7 +264,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
     cv.addEventListener("pointerup", onPointerUp);
     cv.addEventListener("pointercancel", onPointerUp);
 
-    const spawnCoinFly = (fromX: number, fromY: number) => {
+    const spawnCoinFly = (fromX: number, fromY: number, points: number) => {
       const layer = coinLayerRef.current;
       const target = scoreBadgeRef.current;
       if (!layer || !target) return;
@@ -244,9 +273,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
       const toX = targetRect.left + targetRect.width / 2;
       const toY = targetRect.top + targetRect.height / 2;
 
-      const coin = document.createElement("img");
-      coin.src = Coin;
-      coin.alt = "";
+      const coin = createCoinNode(points);
       coin.style.position = "fixed";
       coin.style.width = `${COIN_SIZE}px`;
       coin.style.left = `${fromX - COIN_SIZE / 2}px`;
@@ -341,9 +368,10 @@ const GameScreen = ({ config, onFinish }: Props) => {
         ) {
           if (en.kind === "item") {
             en.hit = true;
-            gained +=
+            const pts =
               en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
-            spawnCoinFly(en.x, en.y);
+            gained += pts;
+            spawnCoinFly(en.x, en.y, pts);
           } else {
             endRound(false);
             return;
