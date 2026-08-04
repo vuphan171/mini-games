@@ -22,7 +22,7 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
 });
 
 const MiniGames = () => {
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.game);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
