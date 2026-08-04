@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getRewardTier } from "../configs/reward-tiers";
 import type { GameOutcome } from "../types";
+import CowWin from "@/assets/logos/cow-win.png";
+import CowLose from "@/assets/logos/cow-lose.png";
+import GiftShirt from "@/assets/logos/gift-shirt.png";
+import GiftKeyChain from "@/assets/logos/gift-keychain.png";
+import GiftSocks from "@/assets/logos/gift-socks.png";
+import AppLogo from "@/assets/logos/app-logo.png";
+import { cn } from "@/lib/utils";
 
-interface ResultScreenProps {
+interface Props {
   outcome: GameOutcome;
   onDone: () => void;
 }
 
 const RESULT_COUNTDOWN_SECONDS = 5;
 
-export default function ResultScreen({ outcome, onDone }: ResultScreenProps) {
-  const win = outcome.result === "win";
+const GIFT_IMAGES: Record<string, string> = {
+  Vớ: GiftSocks,
+  "Móc Khoá": GiftKeyChain,
+  Áo: GiftShirt,
+};
+
+const ResultScreen = ({ outcome, onDone }: Props) => {
   const [countdown, setCountdown] = useState(RESULT_COUNTDOWN_SECONDS);
 
   useEffect(() => {
@@ -22,59 +35,90 @@ export default function ResultScreen({ outcome, onDone }: ResultScreenProps) {
     if (countdown <= 0) onDone();
   }, [countdown, onDone]);
 
+  const isWin = outcome.result !== "lose_obstacle";
+  const tier = getRewardTier(outcome.score);
+
   return (
-    <div className="bg-game-gradient relative flex min-h-dvh w-full items-center justify-center overflow-hidden p-6">
-      <div
-        className="flex w-full max-w-md flex-col items-center gap-4 py-7"
-        style={{ animation: "pop-in .4s ease" }}
-      >
-        <div
-          className="text-8xl leading-none"
-          style={{ animation: "spin-star 1.2s ease" }}
+    <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
+      <div className="flex w-full max-w-xl md:max-w-2xl mt-20 md:mt-0 flex-col items-center rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
+        <div className="mb-6 flex items-center">
+          <img
+            width="auto"
+            height={100}
+            src={AppLogo}
+            className="h-32 w-auto"
+            alt="App Logo"
+            fetchPriority="high"
+            loading="eager"
+            decoding="sync"
+          />
+          <img
+            width={175}
+            height={175}
+            src={isWin ? CowWin : CowLose}
+            alt="Cow Holding Ball"
+            fetchPriority="high"
+            loading="eager"
+            decoding="sync"
+          />
+        </div>
+        <p
+          className={`text-6xl font-extrabold ${isWin ? "text-win" : "text-lose"}`}
         >
-          {win ? "🏆" : "😵"}
+          {isWin ? "CHIẾN THẮNG!" : "THUA RỒI!"}
+        </p>
+        <div className="mt-8 rounded-xl border w-full flex border-brand-tertiary divide-x divide-brand-tertiary">
+          <div className="flex-1 flex flex-col">
+            <div className="bg-brand-tertiary px-3 py-2 rounded-tl-xl">
+              <p className="text-xl text-center text-white uppercase font-extrabold tracking-normal">
+                Số điểm đạt được
+              </p>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-3">
+              <p
+                className={cn(
+                  "text-8xl text-brand-tertiary font-extrabold tracking-normal",
+                  { "text-lose-secondary": !isWin },
+                )}
+              >
+                {outcome.score}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col">
+            <div className="bg-brand-tertiary px-3 py-2 rounded-tr-xl">
+              <p className="text-xl text-center text-white uppercase font-extrabold tracking-normal">
+                Quà tặng nhận được
+              </p>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-3">
+              <img
+                width={80}
+                height={80}
+                src={GIFT_IMAGES[tier.result]}
+                alt={tier.result}
+              />
+            </div>
+          </div>
         </div>
 
-        <h1
-          className="text-6xl leading-none font-extrabold text-white"
-          style={{
-            textShadow: `0 4px 0 ${win ? "#1a4d21" : "#8b1e1e"}, 0 8px 20px rgba(0,0,0,.35)`,
-          }}
-        >
-          {win ? "THẮNG!" : "THUA RỒI!"}
-        </h1>
-
-        {win && (
-          <div
-            className="flex flex-col items-center gap-1 rounded-[22px] border-4 px-10 py-5"
-            style={{
-              borderColor: "#21351f",
-              background: "#fff8e7",
-              boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
-            }}
-          >
-            <p className="text-[15px] font-bold tracking-wide text-[#7a8a72]">
-              ĐIỂM ĐẠT ĐƯỢC
-            </p>
-            <p className="text-8xl leading-none font-extrabold text-[#2c7a37]">
-              {outcome.score}
-            </p>
-            <p className="text-sm text-[#7a8a72]">
-              Đưa màn hình này cho PG để nhận quà 🎁
-            </p>
-          </div>
+        {isWin === false && (
+          <p className="mt-4 text-2xl font-semibold text-lose-secondary text-center">
+            HÃY CỐ GẮNG HƠN Ở LƯỢT SAU NHÉ!
+          </p>
         )}
 
         <Button
-          type="button"
-          variant="game"
+          type="submit"
           size="2xl"
-          className="w-full"
-          onClick={onDone}
+          variant="game"
+          className="mt-6 w-fit px-10"
         >
-          LƯỢT TIẾP THEO ({Math.max(countdown, 0)}s)
+          LƯỢT TIẾP THEO {countdown}s
         </Button>
       </div>
     </div>
   );
-}
+};
+
+export default ResultScreen;

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -10,167 +11,252 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { STORES } from "@/configs";
+import { toast } from "sonner";
 import { ensureAudioContext } from "@/lib/audio";
+import APIService from "@/services/api-service";
 import { useCustomerSchema, TCustomerSchema } from "./schema";
 import type { Customer } from "../../types";
+import { QUERY_KEYS } from "@/configs/query-keys";
+import { IconSetting } from "@/assets";
+import CowHoldingBall from "@/assets/logos/cow-holding-ball.png";
+import AppLogo from "@/assets/logos/app-logo.png";
+import { useEffect } from "react";
+import type { Store } from "@/types/store";
 
 type Props = {
-  onStart: (info: Customer) => void;
-  onOpenConfig: () => void;
+  onStart: (customer: Customer, store: Store) => void;
+  onOpenConfig: (store: Store) => void;
 };
 
 const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
   const customerSchema = useCustomerSchema();
 
-  const { control, handleSubmit, formState } = useForm<TCustomerSchema>({
-    resolver: zodResolver(customerSchema),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      store: STORES[STORES.length - 1],
-    },
+  const { data: stores = [], isLoading: isLoadingStores } = useQuery({
+    queryKey: [QUERY_KEYS.STORE_LIST],
+    queryFn: APIService.getStores,
   });
 
-  const onSubmit = (data: TCustomerSchema) => {
-    ensureAudioContext();
-    onStart(data);
+  const { control, reset, getValues, handleSubmit, formState } =
+    useForm<TCustomerSchema>({
+      resolver: zodResolver(customerSchema),
+      mode: "onChange",
+      defaultValues: {
+        name: "",
+        email: "",
+        phone: "",
+        store: "",
+      },
+    });
+
+  useEffect(() => {
+    const storeId = stores?.length ? stores[stores.length - 1].storeID : "";
+    if (!storeId) return;
+    reset({
+      store: storeId,
+    });
+  }, [reset, stores]);
+
+  const onSubmit = async (data: TCustomerSchema) => {
+    try {
+      const store = stores.find((s) => s.storeID === data.store);
+
+      if (!store) return;
+
+      const customer = await APIService.createCustomer({
+        storeID: store.storeID,
+        customerName: data.name,
+        email: data.email,
+        phone: data.phone,
+        score: 0,
+        playDuration: 0,
+        result: "New",
+      });
+
+      if (!customer) {
+        toast.error("Lưu thông tin khách hàng thất bại");
+        return;
+      }
+
+      ensureAudioContext();
+
+      onStart(customer, store);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <div className="bg-game-gradient relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
+    <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
       <button
         type="button"
-        className="absolute top-4 right-4 text-2xl opacity-40 transition-opacity hover:opacity-80"
+        className="absolute top-6 right-6 size-11 flex items-center justify-center bg-brand-gradient rounded-full text-2xl"
         aria-label="Cài đặt"
-        onClick={onOpenConfig}
+        onClick={() => {
+          const storeId = getValues("store");
+          if (!storeId) return;
+          const store = stores.find((s) => s.storeID === storeId);
+          if (!store) return;
+          onOpenConfig(store);
+        }}
       >
-        ⚙️
+        <IconSetting className="text-white size-6" />
       </button>
-
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full max-w-xl flex-col items-center gap-3.5 py-7"
+        className="flex w-full max-w-xl md:max-w-2xl lg:max-w-3xl mt-20 md:mt-0"
       >
-        <div className="flex flex-col items-center gap-0.5 text-center">
-          <div className="text-7xl">🐮</div>
-          <h1
-            className="text-5xl leading-none font-extrabold text-white"
-            style={{
-              textShadow: "0 3px 0 #1a4d21, 0 6px 14px rgba(0,0,0,.35)",
-            }}
-          >
-            SIÊU BÒ ÚC
-          </h1>
-          <h2
-            className="text-2xl leading-tight font-extrabold text-[#ffd54f]"
-            style={{ textShadow: "0 3px 0 #8a5a00, 0 5px 12px rgba(0,0,0,.3)" }}
-          >
-            ⚽ SÚT BÓNG ⚽
-          </h2>
-        </div>
-
-        <div
-          className="flex w-full flex-col gap-3.5 rounded-[22px] border-4 p-6"
-          style={{
-            borderColor: "#21351f",
-            background: "#fff8e7",
-            boxShadow: "0 8px 0 #21351f, 0 18px 40px rgba(0,0,0,.35)",
-          }}
-        >
-          <p className="text-center text-lg font-bold text-[#2c7a37]">
-            Nhập thông tin để bắt đầu 🎮
+        <div className="flex w-full flex-col rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
+          <div className="mb-10 flex flex-col items-center justify-between md:flex-row gap-4">
+            <div className="flex items-center order-2 gap-2 md:order-1">
+              <img
+                width={100}
+                height={100}
+                src={CowHoldingBall}
+                alt="Cow Holding Ball"
+                fetchPriority="high"
+                loading="eager"
+                decoding="sync"
+              />
+              <p className="text-4xl font-bold text-brand-tertiary">
+                SIÊU BÒ ÚC <br /> SÚT BÓNG
+              </p>
+            </div>
+            <div className="order-1 md:order-2">
+              <img
+                width="auto"
+                height={100}
+                src={AppLogo}
+                className="h-28 w-auto"
+                alt="App Logo"
+                fetchPriority="high"
+                loading="eager"
+                decoding="sync"
+              />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-foreground mb-6">
+            Nhập thông tin để bắt đầu chơi và nhận quà!
           </p>
-
-          <Controller
-            name="name"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Tên khách hàng *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="Nguyễn Văn A"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+          <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-12">
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="capitalize"
+                      required
+                      htmlFor={field.name}
+                    >
+                      Tên khách hàng
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="Nguyễn Văn A"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
-            )}
-          />
+              />
+            </div>
 
-          <Controller
-            name="email"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="a@email.com"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+            <div className="col-span-12 md:col-span-6">
+              <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      required
+                      className="capitalize"
+                      htmlFor={field.name}
+                    >
+                      Email
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="a@email.com"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
-            )}
-          />
+              />
+            </div>
 
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Số điện thoại *</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder="0901234567"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.isTouched && fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
+            <div className="col-span-12 md:col-span-6">
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      className="capitalize"
+                      required
+                      htmlFor={field.name}
+                    >
+                      Số điện thoại
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      placeholder="0901234567"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
-            )}
-          />
+              />
+            </div>
 
-          <Controller
-            name="store"
-            control={control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel htmlFor="store">Cửa hàng *</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger size="lg" id="store" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STORES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
-
+            <div className="col-span-12">
+              <Controller
+                name="store"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel className="capitalize" required htmlFor="store">
+                      Cửa hàng
+                    </FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isLoadingStores}
+                    >
+                      <SelectTrigger size="lg" id="store" className="w-full">
+                        <SelectValue placeholder="Chọn cửa hàng" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stores.map((s) => (
+                          <SelectItem key={s.storeID} value={s.storeID}>
+                            {s.storeName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
           <Button
             type="submit"
             size="2xl"
             variant="game"
-            disabled={!formState.isValid}
-            className="mt-1 w-full"
+            disabled={!formState.isValid || formState.isSubmitting}
+            className="mt-10 w-full"
           >
-            ▶ BẮT ĐẦU CHƠI
+            BẮT ĐẦU CHƠI
           </Button>
         </div>
       </form>

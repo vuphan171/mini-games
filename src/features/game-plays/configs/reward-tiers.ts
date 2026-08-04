@@ -1,12 +1,16 @@
 export interface RewardTier {
+  min: number;
+  max: number;
   label: string;
-  reward: string;
+  result: string;
 }
 
-// ---------- HARDCODE: mốc điểm đổi quà (minh họa, PG đối chiếu và phát quà thủ công) ----------
 export const REWARD_TIERS: RewardTier[] = [
-  { label: "0 – 49 điểm", reward: "Sticker Siêu Bò Úc" },
-  { label: "50 – 99 điểm", reward: "Móc khóa bò" },
-  { label: "100 – 149 điểm", reward: "Ly sứ Siêu Bò" },
-  { label: "150+ điểm", reward: "Gấu bông Bò Úc" },
+  { min: 0, max: 50, label: "0 - 50 điểm", result: "Vớ" },
+  { min: 51, max: 80, label: "51 - 80 điểm", result: "Móc Khoá" },
+  { min: 81, max: Infinity, label: "81 - 100 điểm", result: "Áo" },
 ];
+
+export const getRewardTier = (score: number): RewardTier =>
+  REWARD_TIERS.find((tier) => score >= tier.min && score <= tier.max) ??
+  REWARD_TIERS[0];
