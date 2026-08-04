@@ -4,16 +4,8 @@ interface Props {
 
 const ScoreBadge = ({ score }: Props) => {
   return (
-    <div
-      className="rounded-full border-4 px-6 py-0.5 text-2xl font-extrabold"
-      style={{
-        borderColor: "#21351f",
-        background: "#fff8e7",
-        color: "#2c7a37",
-        boxShadow: "0 4px 0 #21351f",
-      }}
-    >
-      ⭐ {score}
+    <div className="bg-score-gradient px-10 py-2 rounded-xl">
+      <p className="text-2xl font-bold text-white uppercase">Điểm: {score}</p>
     </div>
   );
 };

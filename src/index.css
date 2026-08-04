@@ -88,6 +88,8 @@
   --lose: #828282;
   --lose-secondary: #4f4f4f;
   --danger: #eb1c1c;
+  --score-badge-from: #f5ac0f;
+  --score-badge-to: #e5670c;
 
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -169,6 +171,14 @@
       180deg,
       var(--brand) 0%,
       var(--brand-secondary) 100%
+    );
+  }
+
+  .bg-score-gradient {
+    background: linear-gradient(
+      180deg,
+      var(--score-badge-from) 0%,
+      var(--score-badge-to) 100%
     );
   }
 }

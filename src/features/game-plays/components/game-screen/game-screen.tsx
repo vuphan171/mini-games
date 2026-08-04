@@ -280,8 +280,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
   }, []);
 
   const hudTime = cfg.unlimitedTime
-    ? `🎯 ${score}/${cfg.winningScore}`
-    : `⏱ ${timeLeft}s`;
+    ? `${score}/${cfg.winningScore}`
+    : `Còn lại: ${timeLeft}s`;
 
   return (
     <div className="flex items-center justify-center" style={CONTAINER_STYLE}>
@@ -298,7 +298,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
       />
       <div className="pointer-events-none absolute top-3.5 right-0 left-0 flex justify-center gap-3.5">
         <ScoreBadge score={score} />
-        <TimeBadge label={hudTime} />
+        <TimeBadge time={hudTime} />
       </div>
     </div>
   );
