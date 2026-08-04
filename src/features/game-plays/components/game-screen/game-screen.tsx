@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import type { GameOutcome, GameResultKind } from "../../types";
 import type { GameConfigs } from "../../configs/game";
 import ScoreBadge from "./components/score-badge";
@@ -53,19 +54,18 @@ const SPEED_MULT: Record<GameConfigs["gameSpeed"], number> = {
   veryFast: 1.8,
 };
 
-const CANVAS_HEIGHT = 1080;
-const COW_Y_RATIO = 0.8;
+const CANVAS_WIDTH = 1024;
+const CANVAS_HEIGHT = 1366;
+const COW_Y_RATIO = 0.9;
 const COW_Y = CANVAS_HEIGHT * COW_Y_RATIO;
 
-const GROUND_ANCHOR_Y = COW_Y + 40;
-
-const getGroundAnchorPercent = (boxWidth: number, boxHeight: number) => {
-  if (boxWidth <= 0 || boxHeight <= 0) return 100;
-  const scale = Math.max(boxWidth / 720, boxHeight / 1080);
-  const overflow = boxHeight - 1080 * scale;
-  if (Math.abs(overflow) < 0.01) return 100;
-  const fraction = (boxHeight - GROUND_ANCHOR_Y * scale) / overflow;
-  return Math.min(100, Math.max(0, fraction * 100));
+const CONTAINER_STYLE: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  margin: "auto",
+  width: `min(100vw, calc(100dvh * ${CANVAS_WIDTH} / ${CANVAS_HEIGHT}))`,
+  height: `min(100dvh, calc(100vw * ${CANVAS_HEIGHT} / ${CANVAS_WIDTH}))`,
+  touchAction: "none",
 };
 
 type ItemType = "grain" | "grass";
@@ -103,25 +103,10 @@ const GameScreen = ({ config, onFinish }: Props) => {
   onFinishRef.current = onFinish;
 
   const [score, setScore] = useState(0);
+
   const [timeLeft, setTimeLeft] = useState(
     cfg.unlimitedTime ? 0 : cfg.timeLimit,
   );
-  const [groundAnchorPercent, setGroundAnchorPercent] = useState(100);
-
-  useEffect(() => {
-    const cv = canvasRef.current;
-    if (!cv) return;
-
-    const updateGroundAnchor = () => {
-      const r = cv.getBoundingClientRect();
-      setGroundAnchorPercent(getGroundAnchorPercent(r.width, r.height));
-    };
-
-    updateGroundAnchor();
-    const ro = new ResizeObserver(updateGroundAnchor);
-    ro.observe(cv);
-    return () => ro.disconnect();
-  }, []);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -162,9 +147,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
 
     const setTarget = (clientX: number) => {
       const r = cv.getBoundingClientRect();
-      const coverScale = Math.max(r.width / 720, r.height / 1080);
-      const offsetX = (r.width - 720 * coverScale) / 2;
-      g.targetX = (clientX - r.left - offsetX) / coverScale;
+      g.targetX = ((clientX - r.left) / r.width) * CANVAS_WIDTH;
     };
 
     const onPointerDown = (e: PointerEvent) => {
@@ -188,7 +171,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
     cv.addEventListener("pointercancel", onPointerUp);
 
     const draw = () => {
-      ctx.clearRect(0, 0, 720, 1080);
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       for (const en of g.entities) {
         const img =
@@ -299,19 +282,14 @@ const GameScreen = ({ config, onFinish }: Props) => {
     : `⏱ ${timeLeft}s`;
 
   return (
-    <div
-      className="relative flex w-full items-center justify-center"
-      style={{ height: "100dvh", touchAction: "none" }}
-    >
+    <div className="flex items-center justify-center" style={CONTAINER_STYLE}>
       <canvas
         ref={canvasRef}
-        width={720}
-        height={1080}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
         style={{
           width: "100%",
           height: "100%",
-          objectFit: "cover",
-          objectPosition: `center ${groundAnchorPercent}%`,
           touchAction: "none",
           display: "block",
         }}
