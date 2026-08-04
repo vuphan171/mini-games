@@ -56,6 +56,7 @@
   --color-divider-warm: var(--color-divider-warm);
   --color-win: var(--win);
   --color-danger: var(--danger);
+  --color-lose: var(--lose);
 }
 
 :root {
@@ -83,6 +84,7 @@
   --brand-secondary: #219653;
   --brand-tertiary: #27ae60;
   --win: #fb7701;
+  --lose: #828282;
   --danger: #eb1c1c;
 
   --chart-1: oklch(0.87 0 0);

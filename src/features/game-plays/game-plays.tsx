@@ -21,11 +21,6 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   gameSpeed: store.gameSpeed,
 });
 
-const getResultLabel = (outcome: GameOutcome): string =>
-  outcome.result === "lose_obstacle"
-    ? "Lose"
-    : getRewardTier(outcome.score).result;
-
 const MiniGames = () => {
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
 
@@ -51,7 +46,7 @@ const MiniGames = () => {
     setScreen(GAME_SCREENS.result);
 
     APIService.updateCustomerResult(customer._rowIndex, {
-      result: getResultLabel(result),
+      result: getRewardTier(result.score).result,
       score: result.score,
     });
   };
