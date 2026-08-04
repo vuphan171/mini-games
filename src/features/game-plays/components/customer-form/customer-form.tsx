@@ -44,7 +44,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         name: "",
         email: "",
         phone: "",
-        store: undefined,
+        store: "",
       },
     });
 

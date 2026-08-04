@@ -8,6 +8,7 @@ import GiftShirt from "@/assets/logos/gift-shirt.png";
 import GiftKeyChain from "@/assets/logos/gift-keychain.png";
 import GiftSocks from "@/assets/logos/gift-socks.png";
 import AppLogo from "@/assets/logos/app-logo.png";
+import { cn } from "@/lib/utils";
 
 interface Props {
   outcome: GameOutcome;
@@ -74,7 +75,12 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
               </p>
             </div>
             <div className="flex-1 flex items-center justify-center p-3">
-              <p className="text-8xl text-brand-tertiary font-extrabold tracking-normal">
+              <p
+                className={cn(
+                  "text-8xl text-brand-tertiary font-extrabold tracking-normal",
+                  { "text-lose-secondary": !isWin },
+                )}
+              >
                 {outcome.score}
               </p>
             </div>
@@ -95,6 +101,12 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
             </div>
           </div>
         </div>
+
+        {isWin === false && (
+          <p className="mt-4 text-2xl font-semibold text-lose-secondary text-center">
+            HÃY CỐ GẮNG HƠN Ở LƯỢT SAU NHÉ!
+          </p>
+        )}
 
         <Button
           type="submit"

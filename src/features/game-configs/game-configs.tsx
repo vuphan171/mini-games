@@ -18,6 +18,9 @@ import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+const POINTS_STEP = 5;
+const TIME_LIMIT_STEP = 5;
+
 type Props = {
   store: Store;
   onDone: (data: SettingsFormValues) => void;
@@ -93,6 +96,12 @@ const AdminConfigs = ({ store, onDone }: Props) => {
                       id={field.name}
                       type="number"
                       aria-invalid={fieldState.invalid}
+                      onDecrease={() =>
+                        field.onChange(Math.max(0, field.value - POINTS_STEP))
+                      }
+                      onIncrease={() =>
+                        field.onChange(field.value + POINTS_STEP)
+                      }
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
                     {fieldState.invalid && (
@@ -117,6 +126,12 @@ const AdminConfigs = ({ store, onDone }: Props) => {
                       id={field.name}
                       type="number"
                       aria-invalid={fieldState.invalid}
+                      onDecrease={() =>
+                        field.onChange(Math.max(0, field.value - POINTS_STEP))
+                      }
+                      onIncrease={() =>
+                        field.onChange(field.value + POINTS_STEP)
+                      }
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
                     {fieldState.invalid && (
@@ -171,6 +186,16 @@ const AdminConfigs = ({ store, onDone }: Props) => {
                         id={field.name}
                         type="number"
                         aria-invalid={fieldState.invalid}
+                        onDecrease={() =>
+                          field.onChange(
+                            Math.max(0, (field.value ?? 0) - TIME_LIMIT_STEP),
+                          )
+                        }
+                        onIncrease={() =>
+                          field.onChange(
+                            (field.value ?? 0) + TIME_LIMIT_STEP,
+                          )
+                        }
                         onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                       {fieldState.invalid && (
@@ -199,6 +224,14 @@ const AdminConfigs = ({ store, onDone }: Props) => {
                         id={field.name}
                         type="number"
                         aria-invalid={fieldState.invalid}
+                        onDecrease={() =>
+                          field.onChange(
+                            Math.max(0, (field.value ?? 0) - POINTS_STEP),
+                          )
+                        }
+                        onIncrease={() =>
+                          field.onChange((field.value ?? 0) + POINTS_STEP)
+                        }
                         onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                       {fieldState.invalid && (
