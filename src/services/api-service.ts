@@ -1,13 +1,17 @@
 import appApi from "@/api/axios-client";
 import { ApiResponse } from "@/types/api";
 import type { Store, UpdateStorePayload } from "@/types/store";
-import type { CreateCustomerPayload } from "@/types/customer";
+import type {
+  CreateCustomerPayload,
+  UpdateCustomerResultPayload,
+} from "@/types/customer";
 import { LoggerService } from "./log-service";
+import { Customer } from "@/features/game-plays/types";
 
 const APIService = {
   getStores: async (): Promise<Store[]> => {
     try {
-      const response = await appApi.get<ApiResponse<Store>>("stores");
+      const response = await appApi.get<ApiResponse<Store[]>>("stores");
 
       return response.data.data;
     } catch (error) {
@@ -29,9 +33,28 @@ const APIService = {
     }
   },
 
-  createCustomer: async (payload: CreateCustomerPayload): Promise<boolean> => {
+  createCustomer: async (
+    payload: CreateCustomerPayload,
+  ): Promise<Customer | null> => {
     try {
-      await appApi.post("customers", payload);
+      const response = await appApi.post<ApiResponse<Customer>>(
+        "customers",
+        payload,
+      );
+
+      return response.data.data ?? null;
+    } catch (error) {
+      LoggerService.logError(error);
+      return null;
+    }
+  },
+
+  updateCustomerResult: async (
+    customerID: number,
+    payload: UpdateCustomerResultPayload,
+  ): Promise<boolean> => {
+    try {
+      await appApi.patch(`customers/${customerID}/result`, payload);
       return true;
     } catch (error) {
       LoggerService.logError(error);

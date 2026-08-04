@@ -7,3 +7,16 @@ export interface CreateCustomerPayload {
   result?: string;
   playDuration?: number;
 }
+
+export interface CustomerRecord {
+  customerID: string;
+  storeID: string;
+  customerName: string;
+  email: string;
+  phone: string;
+}
+
+export interface UpdateCustomerResultPayload {
+  result: string;
+  score: number;
+}

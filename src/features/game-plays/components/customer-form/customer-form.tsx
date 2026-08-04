@@ -62,7 +62,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
 
       if (!store) return;
 
-      const success = await APIService.createCustomer({
+      const customer = await APIService.createCustomer({
         storeID: store.storeID,
         customerName: data.name,
         email: data.email,
@@ -72,13 +72,14 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         result: "New",
       });
 
-      if (!success) {
+      if (!customer) {
         toast.error("Lưu thông tin khách hàng thất bại");
         return;
       }
 
       ensureAudioContext();
-      onStart(data, store);
+
+      onStart(customer, store);
     } catch (error) {
       console.log(error);
     }

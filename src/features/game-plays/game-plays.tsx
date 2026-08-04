@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import GameConfigs from "../game-configs";
 import type { Store } from "@/types/store";
+import APIService from "@/services/api-service";
 import type { Customer, GameOutcome } from "./types";
 import { GameScreen, GAME_SCREENS } from "./configs";
 import type { GameConfigs as GameConfigsShape } from "./configs/game";
@@ -19,30 +19,18 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   gameSpeed: store.gameSpeed,
 });
 
-const MOCK_STORE = {
-  storeID: "FOODSERVICE4",
-  storeType: "FOOD SERVICE",
-  location: "Hồ Chí Minh",
-  system: "",
-  storeName: "Heart of Darkness Saigon Taproom",
-  pointsPerGrain: 20,
-  pointsPerGrass: 20,
-  unlimitedTime: true,
-  timeLimit: 60,
-  winningScore: null,
-  gameSpeed: "Fast",
-  lastGamePlay: "2026-08-03 22:50:33",
-  _rowIndex: 28,
-} as any;
+const RESULT_LABELS: Record<GameOutcome["result"], string> = {
+  win: "Win",
+  lose_obstacle: "Lose",
+  lose_timeout: "Lose",
+};
 
 const MiniGames = () => {
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.game);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
-  const [selectedStore, setSelectedStore] = useState<Store | null>(MOCK_STORE);
-
-  console.log("selectedStore", selectedStore);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   const [outcome, setOutcome] = useState<GameOutcome | null>({
     playedSeconds: 60,
@@ -64,6 +52,11 @@ const MiniGames = () => {
     if (!customer) return;
     setOutcome(result);
     setScreen(GAME_SCREENS.result);
+
+    APIService.updateCustomerResult(customer._rowIndex, {
+      result: RESULT_LABELS[result.result],
+      score: result.score,
+    });
   };
 
   return (
@@ -111,7 +104,7 @@ const MiniGames = () => {
         <ResultScreen
           outcome={outcome}
           onDone={() => {
-            // setScreen(GAME_SCREENS.form);
+            setScreen(GAME_SCREENS.form);
           }}
         />
       )}
