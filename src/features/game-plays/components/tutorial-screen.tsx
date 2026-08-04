@@ -24,9 +24,9 @@ const IMG_PROPS = {
 } as const;
 
 const GIFTS = [
-  { src: GiftBall, alt: "Quà tặng vớ", label: REWARD_TIERS[0].label },
-  { src: GiftKeyChain, alt: "Quà tặng móc khóa", label: REWARD_TIERS[1].label },
-  { src: GiftShirt, alt: "Quà tặng áo", label: REWARD_TIERS[2].label },
+  { src: GiftKeyChain, alt: "Quà tặng móc khoá", label: REWARD_TIERS[0].label },
+  { src: GiftShirt, alt: "Quà tặng áo", label: REWARD_TIERS[1].label },
+  { src: GiftBall, alt: "Quà tặng bóng", label: REWARD_TIERS[2].label },
 ];
 
 const HAZARDS = [
