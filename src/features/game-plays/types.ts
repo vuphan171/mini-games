@@ -14,7 +14,7 @@ export interface Customer {
   _rowIndex: number;
 }
 
-export type GameResultKind = "win" | "lose_obstacle" | "lose_timeout";
+export type GameResultKind = "win" | "lose_obstacle";
 
 export interface GameOutcome {
   score: number;

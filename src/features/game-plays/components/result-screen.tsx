@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import CowWin from "@/assets/logos/cow-win.png";
-import type { GameOutcome } from "../types";
 
-interface ResultScreenProps {
-  outcome: GameOutcome;
+interface Props {
   onDone: () => void;
 }
 
-const RESULT_COUNTDOWN_SECONDS = 5;
+const RESULT_COUNTDOWN_SECONDS = 5000;
 
-export default function ResultScreen({ outcome, onDone }: ResultScreenProps) {
-  const win = outcome.result === "win";
+export default function ResultScreen({ onDone }: Props) {
   const [countdown, setCountdown] = useState(RESULT_COUNTDOWN_SECONDS);
 
   useEffect(() => {

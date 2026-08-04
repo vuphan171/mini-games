@@ -14,6 +14,8 @@ export const GAME_SPEED_OPTIONS = [
   { value: GameSpeeds.veryFast, label: "Rất nhanh" },
 ] as const;
 
+export const DEFAULT_WINNING_SCORE = 100;
+
 const DEFAULT_GAME_CONFIG: SettingsFormValues = {
   pointsPerGrain: 10,
   pointsPerGrass: 10,

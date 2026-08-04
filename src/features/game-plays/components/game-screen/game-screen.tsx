@@ -59,6 +59,12 @@ const CANVAS_HEIGHT = 1366;
 const COW_Y_RATIO = 0.9;
 const COW_Y = CANVAS_HEIGHT * COW_Y_RATIO;
 
+const SPAWN_MARGIN_X = 60;
+const SPAWN_MIN_X = SPAWN_MARGIN_X;
+const SPAWN_MAX_X = CANVAS_WIDTH - SPAWN_MARGIN_X;
+const DESPAWN_MARGIN_Y = 60;
+const DESPAWN_Y = CANVAS_HEIGHT + DESPAWN_MARGIN_Y;
+
 const CONTAINER_STYLE: CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -114,8 +120,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
     if (!cv || !ctx) return;
 
     const g: GameState = {
-      cowX: 360,
-      targetX: 360,
+      cowX: CANVAS_WIDTH / 2,
+      targetX: CANVAS_WIDTH / 2,
       dragging: false,
       entities: [],
       score: 0,
@@ -128,16 +134,12 @@ const GameScreen = ({ config, onFinish }: Props) => {
     };
     gameRef.current = g;
 
-    const endRound = (win: boolean, obstacleHit: boolean) => {
+    const endRound = (win: boolean) => {
       if (finished.current) return;
       finished.current = true;
       g.over = true;
       cancelAnimationFrame(rafId.current);
-      const result: GameResultKind = win
-        ? "win"
-        : obstacleHit
-          ? "lose_obstacle"
-          : "lose_timeout";
+      const result: GameResultKind = win ? "win" : "lose_obstacle";
       onFinishRef.current({
         score: g.score,
         result,
@@ -192,14 +194,14 @@ const GameScreen = ({ config, onFinish }: Props) => {
       const maxV = 900 * sp * dt;
       const dx = g.targetX - g.cowX;
       g.cowX += Math.abs(dx) <= maxV ? dx : Math.sign(dx) * maxV;
-      g.cowX = Math.max(60, Math.min(660, g.cowX));
+      g.cowX = Math.max(SPAWN_MIN_X, Math.min(SPAWN_MAX_X, g.cowX));
 
       if (now - g.lastSpawnItem > 750 / sp) {
         g.lastSpawnItem = now;
         g.entities.push({
           kind: "item",
           type: Math.random() < 0.5 ? "grain" : "grass",
-          x: 60 + Math.random() * 600,
+          x: SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X),
           y: -40,
         });
       }
@@ -211,7 +213,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
         g.entities.push({
           kind: "obs",
           type: t,
-          x: 60 + Math.random() * 600,
+          x: SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X),
           y: -40,
         });
       }
@@ -231,18 +233,18 @@ const GameScreen = ({ config, onFinish }: Props) => {
             gained +=
               en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
           } else {
-            endRound(false, true);
+            endRound(false);
             return;
           }
         }
       }
-      g.entities = g.entities.filter((en) => !en.hit && en.y < 1140);
+      g.entities = g.entities.filter((en) => !en.hit && en.y < DESPAWN_Y);
 
       if (gained) {
         g.score += gained;
         setScore(g.score);
         if (cfg.unlimitedTime && g.score >= cfg.winningScore) {
-          endRound(true, false);
+          endRound(true);
           return;
         }
       }
@@ -253,7 +255,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
         const left = Math.max(0, Math.ceil(cfg.timeLimit - elapsed));
         setTimeLeft((prev) => (prev !== left ? left : prev));
         if (elapsed >= cfg.timeLimit) {
-          endRound(true, false);
+          endRound(true);
           return;
         }
       } else {

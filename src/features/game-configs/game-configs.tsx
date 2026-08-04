@@ -12,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import APIService from "@/services/api-service";
 import type { Store, UpdateStorePayload } from "@/types/store";
-import { GAME_SPEED_OPTIONS, GameSpeeds } from "./configs";
+import { GAME_SPEED_OPTIONS, GameSpeeds, DEFAULT_WINNING_SCORE } from "./configs";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -37,7 +37,7 @@ const AdminConfigs = ({ store, onDone }: Props) => {
       pointsPerGrass: store?.pointsPerGrass || 10,
       timeLimit: store?.timeLimit || 15,
       unlimitedTime: store?.unlimitedTime || false,
-      winningScore: store?.winningScore || 100,
+      winningScore: store?.winningScore || DEFAULT_WINNING_SCORE,
     },
   });
 

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import GameConfigs from "../game-configs";
+import { DEFAULT_WINNING_SCORE } from "../game-configs/configs";
+import { getRewardTier } from "./configs/reward-tiers";
 import type { Store } from "@/types/store";
 import APIService from "@/services/api-service";
 import type { Customer, GameOutcome } from "./types";
@@ -15,28 +17,21 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   pointsPerGrass: store.pointsPerGrass,
   unlimitedTime: store.unlimitedTime,
   timeLimit: store.timeLimit,
-  winningScore: store.winningScore ?? 0,
+  winningScore: store.winningScore ?? DEFAULT_WINNING_SCORE,
   gameSpeed: store.gameSpeed,
 });
 
-const RESULT_LABELS: Record<GameOutcome["result"], string> = {
-  win: "Win",
-  lose_obstacle: "Lose",
-  lose_timeout: "Lose",
-};
+const getResultLabel = (outcome: GameOutcome): string =>
+  outcome.result === "lose_obstacle"
+    ? "Lose"
+    : getRewardTier(outcome.score).result;
 
 const MiniGames = () => {
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.result);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-
-  const [outcome, setOutcome] = useState<GameOutcome | null>({
-    playedSeconds: 60,
-    result: "win",
-    score: 100,
-  });
 
   const startTutorial = (customer: Customer, store: Store) => {
     setCustomer(customer);
@@ -50,11 +45,10 @@ const MiniGames = () => {
 
   const finishGame = (result: GameOutcome) => {
     if (!customer) return;
-    setOutcome(result);
     setScreen(GAME_SCREENS.result);
 
     APIService.updateCustomerResult(customer._rowIndex, {
-      result: RESULT_LABELS[result.result],
+      result: getResultLabel(result),
       score: result.score,
     });
   };
@@ -100,9 +94,8 @@ const MiniGames = () => {
       {screen === GAME_SCREENS.game && selectedStore && (
         <PlayGame config={toGameConfigs(selectedStore)} onFinish={finishGame} />
       )}
-      {screen === GAME_SCREENS.result && outcome && (
+      {screen === GAME_SCREENS.result && (
         <ResultScreen
-          outcome={outcome}
           onDone={() => {
             setScreen(GAME_SCREENS.form);
           }}

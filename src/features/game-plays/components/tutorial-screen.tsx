@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useCountdown } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
 import type { GameConfigs } from "../configs/game";
+import { REWARD_TIERS } from "../configs/reward-tiers";
 import Grains from "@/assets/logos/grains.png";
 import CowRun from "@/assets/logos/cow-run.png";
 import Grass from "@/assets/logos/grass.png";
@@ -23,9 +24,9 @@ const IMG_PROPS = {
 } as const;
 
 const GIFTS = [
-  { src: GiftSocks, alt: "Quà tặng vớ", label: "0 - 50 điểm" },
-  { src: GiftKeyChain, alt: "Quà tặng móc khóa", label: "51 - 80 điểm" },
-  { src: GiftShirt, alt: "Quà tặng áo", label: "81 - 100 điểm" },
+  { src: GiftSocks, alt: "Quà tặng vớ", label: REWARD_TIERS[0].label },
+  { src: GiftKeyChain, alt: "Quà tặng móc khóa", label: REWARD_TIERS[1].label },
+  { src: GiftShirt, alt: "Quà tặng áo", label: REWARD_TIERS[2].label },
 ];
 
 const HAZARDS = [
