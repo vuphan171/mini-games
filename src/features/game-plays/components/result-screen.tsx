@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Button } from "@/components/ui/button";
 import {
   getRewardTier,
   RewardResults,
   type RewardResult,
 } from "../configs/reward-tiers";
+import { CELEBRATION_LOTTIE_SRC } from "../configs/celebration";
 import type { GameOutcome } from "../types";
 import CowWin from "@/assets/logos/cow-win.png";
 import CowLose from "@/assets/logos/cow-lose.png";
@@ -49,6 +51,14 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
 
   return (
     <div className="relative min-h-dvh flex w-full items-center justify-center overflow-hidden p-6">
+      {isWin && (
+        <DotLottieReact
+          src={CELEBRATION_LOTTIE_SRC}
+          loop
+          autoplay
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        />
+      )}
       <div className="flex w-full max-w-xl md:max-w-2xl mt-20 md:mt-0 flex-col items-center rounded-3xl p-6 bg-white shadow-card md:p-10 lg:p-14">
         <div className="mb-6 flex items-center">
           <img
