@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import GameConfigs from "../game-configs";
 import { DEFAULT_WINNING_SCORE } from "../game-configs/configs";
@@ -22,28 +21,12 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   gameSpeed: store.gameSpeed,
 });
 
-const MOCK_STORE = {
-  storeID: "FOODSERVICE4",
-  storeType: "FOOD SERVICE",
-  location: "Hồ Chí Minh",
-  system: "",
-  storeName: "Heart of Darkness Saigon Taproom",
-  pointsPerGrain: 2,
-  pointsPerGrass: 2,
-  unlimitedTime: false,
-  timeLimit: 15,
-  winningScore: null,
-  gameSpeed: "veryFast",
-  lastGamePlay: "2026-08-04 09:33:21",
-  _rowIndex: 28,
-} as any;
-
 const MiniGames = () => {
   const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.game);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
-  const [selectedStore, setSelectedStore] = useState<Store | null>(MOCK_STORE);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   const [outcome, setOutcome] = useState<GameOutcome | null>(null);
 
