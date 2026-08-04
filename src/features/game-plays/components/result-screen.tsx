@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getRewardTier } from "../configs/reward-tiers";
+import {
+  getRewardTier,
+  RewardResults,
+  type RewardResult,
+} from "../configs/reward-tiers";
 import type { GameOutcome } from "../types";
 import CowWin from "@/assets/logos/cow-win.png";
 import CowLose from "@/assets/logos/cow-lose.png";
 import GiftShirt from "@/assets/logos/gift-shirt.png";
 import GiftKeyChain from "@/assets/logos/gift-keychain.png";
-import GiftSocks from "@/assets/logos/gift-socks.png";
+import GiftBall from "@/assets/logos/gift-ball.png";
 import AppLogo from "@/assets/logos/app-logo.png";
 import { cn } from "@/lib/utils";
 
@@ -17,10 +21,15 @@ interface Props {
 
 const RESULT_COUNTDOWN_SECONDS = 5;
 
-const GIFT_IMAGES: Record<string, string> = {
-  Vớ: GiftSocks,
-  "Móc Khoá": GiftKeyChain,
-  Áo: GiftShirt,
+const getGiftImage = (result: RewardResult): string => {
+  switch (result) {
+    case RewardResults.keyChain:
+      return GiftKeyChain;
+    case RewardResults.shirt:
+      return GiftShirt;
+    case RewardResults.ball:
+      return GiftBall;
+  }
 };
 
 const ResultScreen = ({ outcome, onDone }: Props) => {
@@ -95,7 +104,7 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
               <img
                 width={80}
                 height={80}
-                src={GIFT_IMAGES[tier.result]}
+                src={getGiftImage(tier.result)}
                 alt={tier.result}
               />
             </div>

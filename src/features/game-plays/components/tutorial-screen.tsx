@@ -11,7 +11,7 @@ import Referee from "@/assets/logos/referee.png";
 import Vaccine from "@/assets/logos/vaccine.png";
 import GiftShirt from "@/assets/logos/gift-shirt.png";
 import GiftKeyChain from "@/assets/logos/gift-keychain.png";
-import GiftSocks from "@/assets/logos/gift-socks.png";
+import GiftBall from "@/assets/logos/gift-ball.png";
 import IcHand from "@/assets/logos/ic-hand.png";
 import IcArrow from "@/assets/logos/ic-arrow.png";
 
@@ -24,7 +24,7 @@ const IMG_PROPS = {
 } as const;
 
 const GIFTS = [
-  { src: GiftSocks, alt: "Quà tặng vớ", label: REWARD_TIERS[0].label },
+  { src: GiftBall, alt: "Quà tặng vớ", label: REWARD_TIERS[0].label },
   { src: GiftKeyChain, alt: "Quà tặng móc khóa", label: REWARD_TIERS[1].label },
   { src: GiftShirt, alt: "Quà tặng áo", label: REWARD_TIERS[2].label },
 ];
@@ -79,7 +79,7 @@ export default function TutorialScreen({ config, onStart }: Props) {
         </h3>
       </header>
 
-      <div className="flex items-start gap-2 px-3 py-5">
+      <div className="flex items-start gap-2 px-3 py-5 justify-between">
         <ul className="space-y-4">
           {SCORING_ITEMS.map(({ src, alt, width, height, label }) => (
             <li key={alt} className="flex items-center gap-4">
