@@ -27,11 +27,13 @@ const getResultLabel = (outcome: GameOutcome): string =>
     : getRewardTier(outcome.score).result;
 
 const MiniGames = () => {
-  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.result);
+  const [screen, setScreen] = useState<GameScreen>(GAME_SCREENS.form);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
 
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+
+  const [outcome, setOutcome] = useState<GameOutcome | null>(null);
 
   const startTutorial = (customer: Customer, store: Store) => {
     setCustomer(customer);
@@ -45,6 +47,7 @@ const MiniGames = () => {
 
   const finishGame = (result: GameOutcome) => {
     if (!customer) return;
+    setOutcome(result);
     setScreen(GAME_SCREENS.result);
 
     APIService.updateCustomerResult(customer._rowIndex, {
@@ -94,8 +97,9 @@ const MiniGames = () => {
       {screen === GAME_SCREENS.game && selectedStore && (
         <PlayGame config={toGameConfigs(selectedStore)} onFinish={finishGame} />
       )}
-      {screen === GAME_SCREENS.result && (
+      {screen === GAME_SCREENS.result && outcome && (
         <ResultScreen
+          outcome={outcome}
           onDone={() => {
             setScreen(GAME_SCREENS.form);
           }}
