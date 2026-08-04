@@ -9,11 +9,20 @@ import Grass from "@/assets/logos/grass.png";
 import Virus from "@/assets/logos/virus.png";
 import Referee from "@/assets/logos/referee.png";
 import Vaccine from "@/assets/logos/vaccine.png";
+import Coin from "@/assets/logos/coin.png";
 import CowRunAnimation from "@/assets/logos/cow-run-animation.gif";
 import { GifPlayer } from "./gif-player";
 
 const ITEM_HEIGHT = 70;
 const COW_HEIGHT = 116;
+const COIN_SIZE = 38;
+const COIN_FLY_MS = 1150;
+
+const COIN_SCALE_KEYFRAMES: Keyframe[] = [
+  { transform: "scale(0.4)", offset: 0 },
+  { transform: "scale(1.4)", offset: 0.45 },
+  { transform: "scale(0.6)", offset: 1 },
+];
 
 const loadImage = (src: string) => {
   const img = new Image();
@@ -137,6 +146,8 @@ interface Props {
 const GameScreen = ({ config, onFinish }: Props) => {
   const cfg = useRef<GameConfigs>(config).current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const coinLayerRef = useRef<HTMLDivElement>(null);
+  const scoreBadgeRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<GameState | null>(null);
   const rafId = useRef(0);
   const finished = useRef(false);
@@ -224,6 +235,40 @@ const GameScreen = ({ config, onFinish }: Props) => {
     cv.addEventListener("pointerup", onPointerUp);
     cv.addEventListener("pointercancel", onPointerUp);
 
+    const spawnCoinFly = (fromX: number, fromY: number) => {
+      const layer = coinLayerRef.current;
+      const target = scoreBadgeRef.current;
+      if (!layer || !target) return;
+
+      const targetRect = target.getBoundingClientRect();
+      const toX = targetRect.left + targetRect.width / 2;
+      const toY = targetRect.top + targetRect.height / 2;
+
+      const coin = document.createElement("img");
+      coin.src = Coin;
+      coin.alt = "";
+      coin.style.position = "fixed";
+      coin.style.width = `${COIN_SIZE}px`;
+      coin.style.left = `${fromX - COIN_SIZE / 2}px`;
+      coin.style.top = `${fromY - COIN_SIZE / 2}px`;
+      coin.style.transition = `left ${COIN_FLY_MS}ms ease-in, top ${COIN_FLY_MS}ms cubic-bezier(0.3, 0, 0.7, 1), opacity ${COIN_FLY_MS}ms ease-in`;
+
+      layer.appendChild(coin);
+      coin.animate(COIN_SCALE_KEYFRAMES, {
+        duration: COIN_FLY_MS,
+        easing: "ease-in-out",
+        fill: "forwards",
+      });
+
+      requestAnimationFrame(() => {
+        coin.style.left = `${toX - COIN_SIZE / 2}px`;
+        coin.style.top = `${toY - COIN_SIZE / 2}px`;
+        coin.style.opacity = "0.2";
+      });
+
+      setTimeout(() => coin.remove(), COIN_FLY_MS + 50);
+    };
+
     const draw = (now: number) => {
       ctx.clearRect(0, 0, size.width, size.height);
 
@@ -298,6 +343,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
             en.hit = true;
             gained +=
               en.type === "grain" ? cfg.pointsPerGrain : cfg.pointsPerGrass;
+            spawnCoinFly(en.x, en.y);
           } else {
             endRound(false);
             return;
@@ -364,9 +410,15 @@ const GameScreen = ({ config, onFinish }: Props) => {
         }}
       />
       <div className="pointer-events-none absolute top-3.5 right-0 left-0 flex justify-center gap-3.5">
-        <ScoreBadge score={score} />
+        <div ref={scoreBadgeRef}>
+          <ScoreBadge score={score} />
+        </div>
         <TimeBadge time={hudTime} />
       </div>
+      <div
+        ref={coinLayerRef}
+        className="pointer-events-none fixed inset-0 z-50"
+      />
     </div>
   );
 };
