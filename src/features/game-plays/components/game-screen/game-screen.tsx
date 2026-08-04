@@ -9,7 +9,8 @@ import Grass from "@/assets/logos/grass.png";
 import Virus from "@/assets/logos/virus.png";
 import Referee from "@/assets/logos/referee.png";
 import Vaccine from "@/assets/logos/vaccine.png";
-import CowRun from "@/assets/logos/cow-run.png";
+import CowRunAnimation from "@/assets/logos/cow-run-animation.gif";
+import { GifPlayer } from "./gif-player";
 
 const ITEM_HEIGHT = 70;
 const COW_HEIGHT = 116;
@@ -22,16 +23,34 @@ const loadImage = (src: string) => {
 
 const drawCenteredByHeight = (
   ctx: CanvasRenderingContext2D,
+  img: CanvasImageSource,
+  srcWidth: number,
+  srcHeight: number,
+  cx: number,
+  cy: number,
+  height: number,
+) => {
+  const scale = height / (srcHeight || height);
+  const w = (srcWidth || height) * scale;
+  ctx.drawImage(img, cx - w / 2, cy - height / 2, w, height);
+};
+
+const drawImageCenteredByHeight = (
+  ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   cx: number,
   cy: number,
   height: number,
 ) => {
-  const naturalW = img.naturalWidth || height;
-  const naturalH = img.naturalHeight || height;
-  const scale = height / naturalH;
-  const w = naturalW * scale;
-  ctx.drawImage(img, cx - w / 2, cy - height / 2, w, height);
+  drawCenteredByHeight(
+    ctx,
+    img,
+    img.naturalWidth,
+    img.naturalHeight,
+    cx,
+    cy,
+    height,
+  );
 };
 
 const ITEM_IMAGES: Record<ItemType, HTMLImageElement> = {
@@ -45,7 +64,10 @@ const OBS_IMAGES: Record<ObsType, HTMLImageElement> = {
   ref: loadImage(Referee),
 };
 
-const COW_IMAGE = loadImage(CowRun);
+const cowGifPlayer = new GifPlayer();
+cowGifPlayer
+  .load(CowRunAnimation)
+  .catch((err) => console.error("Failed to load cow run animation", err));
 
 const SPEED_MULT: Record<GameConfigs["gameSpeed"], number> = {
   Slow: 0.7,
@@ -54,15 +76,11 @@ const SPEED_MULT: Record<GameConfigs["gameSpeed"], number> = {
   veryFast: 1.8,
 };
 
-// Bò dừng ở vị trí này theo % chiều cao màn hình thật, không còn phụ thuộc
-// độ phân giải canvas cố định nữa.
 const COW_Y_RATIO = 0.9;
 
 const SPAWN_MARGIN_X = 60;
 const DESPAWN_MARGIN_Y = 60;
 
-// Né các vật thể vừa spawn (còn gần đỉnh) khi chọn x cho vật thể mới, tránh
-// chồng vị trí ngay lúc rơi xuống.
 const MIN_SPAWN_SPACING_X = 120;
 const SPAWN_OVERLAP_CHECK_Y = 100;
 const MAX_SPAWN_ATTEMPTS = 10;
@@ -206,23 +224,28 @@ const GameScreen = ({ config, onFinish }: Props) => {
     cv.addEventListener("pointerup", onPointerUp);
     cv.addEventListener("pointercancel", onPointerUp);
 
-    const draw = () => {
+    const draw = (now: number) => {
       ctx.clearRect(0, 0, size.width, size.height);
 
       for (const en of g.entities) {
         const img =
           en.kind === "item" ? ITEM_IMAGES[en.type] : OBS_IMAGES[en.type];
 
-        drawCenteredByHeight(ctx, img, en.x, en.y, ITEM_HEIGHT);
+        drawImageCenteredByHeight(ctx, img, en.x, en.y, ITEM_HEIGHT);
       }
 
-      drawCenteredByHeight(
-        ctx,
-        COW_IMAGE,
-        g.cowX,
-        size.height * COW_Y_RATIO,
-        COW_HEIGHT,
-      );
+      const cowFrame = cowGifPlayer.getFrame(now);
+      if (cowFrame) {
+        drawCenteredByHeight(
+          ctx,
+          cowFrame,
+          cowGifPlayer.width,
+          cowGifPlayer.height,
+          g.cowX,
+          size.height * COW_Y_RATIO,
+          COW_HEIGHT,
+        );
+      }
     };
 
     const tick = (now: number) => {
@@ -308,7 +331,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
         setTimeLeft((prev) => (prev !== t ? t : prev));
       }
 
-      draw();
+      draw(now);
       rafId.current = requestAnimationFrame(tick);
     };
 

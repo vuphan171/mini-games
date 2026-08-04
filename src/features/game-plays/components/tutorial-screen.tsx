@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useCountdown } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
 import type { GameConfigs } from "../configs/game";
-import { REWARD_TIERS } from "../configs/reward-tiers";
+import { REWARD_TIERS, RewardResults } from "../configs/reward-tiers";
 import Grains from "@/assets/logos/grains.png";
 import CowRun from "@/assets/logos/cow-run.png";
 import Grass from "@/assets/logos/grass.png";
@@ -23,10 +23,25 @@ const IMG_PROPS = {
   decoding: "sync",
 } as const;
 
+const getRewardTierLabel = (result: (typeof RewardResults)[keyof typeof RewardResults]) =>
+  REWARD_TIERS.find((tier) => tier.result === result)?.label ?? "";
+
 const GIFTS = [
-  { src: GiftKeyChain, alt: "Quà tặng móc khoá", label: REWARD_TIERS[0].label },
-  { src: GiftShirt, alt: "Quà tặng áo", label: REWARD_TIERS[1].label },
-  { src: GiftBall, alt: "Quà tặng bóng", label: REWARD_TIERS[2].label },
+  {
+    src: GiftKeyChain,
+    alt: "Quà tặng móc khoá",
+    label: getRewardTierLabel(RewardResults.keyChain),
+  },
+  {
+    src: GiftShirt,
+    alt: "Quà tặng áo",
+    label: getRewardTierLabel(RewardResults.shirt),
+  },
+  {
+    src: GiftBall,
+    alt: "Quà tặng bóng",
+    label: getRewardTierLabel(RewardResults.ball),
+  },
 ];
 
 const HAZARDS = [
