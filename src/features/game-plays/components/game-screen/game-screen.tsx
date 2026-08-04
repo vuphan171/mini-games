@@ -11,8 +11,8 @@ import Referee from "@/assets/logos/referee.png";
 import Vaccine from "@/assets/logos/vaccine.png";
 import CowRun from "@/assets/logos/cow-run.png";
 
-const ITEM_HEIGHT = 57;
-const COW_HEIGHT = 86;
+const ITEM_HEIGHT = 77;
+const COW_HEIGHT = 126;
 
 const loadImage = (src: string) => {
   const img = new Image();
@@ -64,6 +64,28 @@ const SPAWN_MIN_X = SPAWN_MARGIN_X;
 const SPAWN_MAX_X = CANVAS_WIDTH - SPAWN_MARGIN_X;
 const DESPAWN_MARGIN_Y = 60;
 const DESPAWN_Y = CANVAS_HEIGHT + DESPAWN_MARGIN_Y;
+
+// Né các vật thể vừa spawn (còn gần đỉnh) khi chọn x cho vật thể mới, tránh
+// chồng vị trí ngay lúc rơi xuống.
+const MIN_SPAWN_SPACING_X = 120;
+const SPAWN_OVERLAP_CHECK_Y = 100;
+const MAX_SPAWN_ATTEMPTS = 10;
+
+const getSpawnX = (entities: Entity[]): number => {
+  let x = SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X);
+
+  for (let attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++) {
+    const overlaps = entities.some(
+      (en) =>
+        en.y < SPAWN_OVERLAP_CHECK_Y &&
+        Math.abs(en.x - x) < MIN_SPAWN_SPACING_X,
+    );
+    if (!overlaps) return x;
+    x = SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X);
+  }
+
+  return x;
+};
 
 const CONTAINER_STYLE: CSSProperties = {
   position: "fixed",
@@ -201,7 +223,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
         g.entities.push({
           kind: "item",
           type: Math.random() < 0.5 ? "grain" : "grass",
-          x: SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X),
+          x: getSpawnX(g.entities),
           y: -40,
         });
       }
@@ -213,7 +235,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
         g.entities.push({
           kind: "obs",
           type: t,
-          x: SPAWN_MIN_X + Math.random() * (SPAWN_MAX_X - SPAWN_MIN_X),
+          x: getSpawnX(g.entities),
           y: -40,
         });
       }
