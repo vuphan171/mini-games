@@ -8,12 +8,16 @@ import type {
 import { LoggerService } from "./log-service";
 import { Customer } from "@/features/game-plays/types";
 
+const sortStoreOptions = (stores: Store[]): Store[] => {
+  return [...stores].sort((a, b) => a.location.localeCompare(b.location));
+};
+
 const APIService = {
   getStores: async (): Promise<Store[]> => {
     try {
       const response = await appApi.get<ApiResponse<Store[]>>("stores");
 
-      return response.data.data;
+      return sortStoreOptions(response?.data?.data ?? []);
     } catch (error) {
       LoggerService.logError(error);
       return [];

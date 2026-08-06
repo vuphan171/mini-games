@@ -212,6 +212,7 @@ const AdminConfigs = ({ store, onDone }: Props) => {
               size="2xl"
               className="w-full uppercase"
               disabled={isSubmitting}
+              loading={isSubmitting}
             >
               Lưu cài đặt
             </Button>

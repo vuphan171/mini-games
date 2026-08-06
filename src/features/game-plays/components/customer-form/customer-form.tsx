@@ -43,7 +43,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       mode: "onChange",
       defaultValues: {
         name: "",
-        email: "",
+        invoice: "",
         phone: "",
         store: "",
         termsAccepted: false,
@@ -67,7 +67,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       const customer = await APIService.createCustomer({
         storeID: store.storeID,
         customerName: data.name,
-        email: "phanzz147@gmail.com",
+        invoice: data.invoice,
         phone: data.phone,
         score: 0,
         playDuration: 0,
@@ -169,7 +169,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
 
             <div className="col-span-12 md:col-span-6">
               <Controller
-                name="email"
+                name="invoice"
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
@@ -241,7 +241,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                       <SelectContent>
                         {stores.map((s) => (
                           <SelectItem key={s.storeID} value={s.storeID}>
-                            {s.storeName}
+                            {`${s.location} - ${s.storeName}`}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -288,7 +288,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
             type="submit"
             size="2xl"
             variant="game"
-            disabled={!formState.isValid}
+            disabled={!formState.isValid || formState.isSubmitting}
             loading={formState.isSubmitting}
             className="mt-10 w-full"
           >

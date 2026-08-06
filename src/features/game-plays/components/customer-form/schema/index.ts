@@ -5,7 +5,7 @@ const PHONE_REGEX = /^(0|\+84)[35789]\d{8}$/;
 export const useCustomerSchema = () => {
   return z.object({
     name: z.string().trim().min(1, "Vui lòng nhập tên khách hàng"),
-    email: z.string().trim().min(1, "Vui lòng nhập số hoá đơn"),
+    invoice: z.string().trim().min(1, "Vui lòng nhập số hoá đơn"),
     phone: z.string().trim().regex(PHONE_REGEX, "Số điện thoại không hợp lệ"),
     store: z.string().min(1, "Vui lòng chọn cửa hàng"),
     termsAccepted: z
