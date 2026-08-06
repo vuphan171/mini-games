@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { GameOutcome, GameResultKind } from "../../types";
+import type { Customer, GameOutcome, GameResultKind } from "../../types";
 import type { GameConfigs } from "../../configs/game";
 import ScoreBadge from "./components/score-badge";
 import TimeBadge from "./components/time-badge";
@@ -169,10 +169,11 @@ interface GameState {
 
 interface Props {
   config: GameConfigs;
+  customer: Customer;
   onFinish: (result: GameOutcome) => void;
 }
 
-const GameScreen = ({ config, onFinish }: Props) => {
+const GameScreen = ({ config, customer, onFinish }: Props) => {
   const cfg = useRef<GameConfigs>(config).current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const coinLayerRef = useRef<HTMLDivElement>(null);
@@ -235,6 +236,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
       onFinishRef.current({
         score: g.score,
         result,
+        fullName: customer.customerName,
+        phoneNumber: customer.phone,
         playedSeconds: Math.round((performance.now() - g.startTime) / 1000),
       });
     };
@@ -359,6 +362,7 @@ const GameScreen = ({ config, onFinish }: Props) => {
       const cowY = size.height * COW_Y_RATIO;
       const fall = 260 * sp * dt;
       let gained = 0;
+      let lost = 0;
       for (const en of g.entities) {
         en.y += fall;
         if (
@@ -373,8 +377,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
             gained += pts;
             spawnCoinFly(en.x, en.y, pts);
           } else {
-            endRound(false);
-            return;
+            en.hit = true;
+            lost += cfg.penaltyPoints;
           }
         }
       }
@@ -382,8 +386,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
         (en) => !en.hit && en.y < size.height + DESPAWN_MARGIN_Y,
       );
 
-      if (gained) {
-        g.score += gained;
+      if (gained || lost) {
+        g.score = Math.max(0, g.score + gained - lost);
         setScore(g.score);
         if (cfg.unlimitedTime && g.score >= cfg.winningScore) {
           endRound(true);

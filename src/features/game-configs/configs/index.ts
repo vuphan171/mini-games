@@ -16,9 +16,12 @@ export const GAME_SPEED_OPTIONS = [
 
 export const DEFAULT_WINNING_SCORE = 100;
 
+export const DEFAULT_PENALTY = 5;
+
 const DEFAULT_GAME_CONFIG: SettingsFormValues = {
   pointsPerGrain: 10,
   pointsPerGrass: 10,
+  penalty: DEFAULT_PENALTY,
   unlimitedTime: false,
   timeLimit: 45,
   gameSpeed: GameSpeeds.normal,

@@ -1,7 +1,7 @@
 export interface CreateCustomerPayload {
   storeID: string;
   customerName: string;
-  email: string;
+  invoice: string;
   phone: string;
   score?: number;
   result?: string;
@@ -12,7 +12,7 @@ export interface CustomerRecord {
   customerID: string;
   storeID: string;
   customerName: string;
-  email: string;
+  invoice: string;
   phone: string;
 }
 

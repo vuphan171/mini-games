@@ -20,4 +20,6 @@ export interface GameOutcome {
   score: number;
   result: GameResultKind;
   playedSeconds: number;
+  fullName: string;
+  phoneNumber: string;
 }

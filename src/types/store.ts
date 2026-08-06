@@ -8,6 +8,7 @@ export interface Store {
   storeName: string;
   pointsPerGrain: number;
   pointsPerGrass: number;
+  penaltyPoints: number;
   unlimitedTime: boolean;
   timeLimit: number;
   winningScore: number | null;
@@ -19,6 +20,7 @@ export interface Store {
 export interface UpdateStorePayload {
   pointsPerGrain: number;
   pointsPerGrass: number;
+  penaltyPoints: number;
   unlimitedTime: boolean;
   timeLimit?: number;
   winningScore?: number;

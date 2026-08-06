@@ -10,6 +10,7 @@ export const schema = z
   .object({
     pointsPerGrain: z.number({ error: "Phải là một số" }),
     pointsPerGrass: z.number({ error: "Phải là một số" }),
+    penalty: z.number({ error: "Phải là một số" }),
     unlimitedTime: z.boolean(),
     timeLimit: z.number({ error: "Phải là một số" }).optional(),
     winningScore: z.number({ error: "Phải là một số" }).optional(),

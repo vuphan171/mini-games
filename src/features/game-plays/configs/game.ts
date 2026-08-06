@@ -7,4 +7,5 @@ export interface GameConfigs {
   timeLimit: number;
   winningScore: number;
   gameSpeed: GameSpeed;
+  penaltyPoints: number;
 }
