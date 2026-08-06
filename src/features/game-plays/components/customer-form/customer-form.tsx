@@ -67,7 +67,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       const customer = await APIService.createCustomer({
         storeID: store.storeID,
         customerName: data.name,
-        email: data.email,
+        email: "phanzz147@gmail.com",
         phone: data.phone,
         score: 0,
         playDuration: 0,

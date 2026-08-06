@@ -362,6 +362,7 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
       const cowY = size.height * COW_Y_RATIO;
       const fall = 260 * sp * dt;
       let gained = 0;
+      let lost = 0;
       for (const en of g.entities) {
         en.y += fall;
         if (
@@ -376,8 +377,8 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
             gained += pts;
             spawnCoinFly(en.x, en.y, pts);
           } else {
-            endRound(false);
-            return;
+            en.hit = true;
+            lost += cfg.penaltyPoints;
           }
         }
       }
@@ -385,8 +386,8 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
         (en) => !en.hit && en.y < size.height + DESPAWN_MARGIN_Y,
       );
 
-      if (gained) {
-        g.score += gained;
+      if (gained || lost) {
+        g.score = Math.max(0, g.score + gained - lost);
         setScore(g.score);
         if (cfg.unlimitedTime && g.score >= cfg.winningScore) {
           endRound(true);

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import GameConfigs from "../game-configs";
-import { DEFAULT_WINNING_SCORE } from "../game-configs/configs";
+import {
+  DEFAULT_WINNING_SCORE,
+  DEFAULT_PENALTY,
+} from "../game-configs/configs";
 import { getRewardTier } from "./configs/reward-tiers";
 import type { Store } from "@/types/store";
 import APIService from "@/services/api-service";
@@ -19,6 +22,7 @@ const toGameConfigs = (store: Store): GameConfigsShape => ({
   timeLimit: store.timeLimit,
   winningScore: store.winningScore ?? DEFAULT_WINNING_SCORE,
   gameSpeed: store.gameSpeed,
+  penaltyPoints: store.penaltyPoints ?? DEFAULT_PENALTY,
 });
 
 const MiniGames = () => {
@@ -72,6 +76,7 @@ const MiniGames = () => {
                     ...prev,
                     pointsPerGrain: data.pointsPerGrain,
                     pointsPerGrass: data.pointsPerGrass,
+                    penalty: data.penalty,
                     unlimitedTime: data.unlimitedTime,
                     gameSpeed: data.gameSpeed,
                     timeLimit: data.timeLimit ?? prev.timeLimit,

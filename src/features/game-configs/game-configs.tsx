@@ -14,6 +14,7 @@ import {
   GAME_SPEED_OPTIONS,
   GameSpeeds,
   DEFAULT_WINNING_SCORE,
+  DEFAULT_PENALTY,
 } from "./configs";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
@@ -42,7 +43,7 @@ const AdminConfigs = ({ store, onDone }: Props) => {
       timeLimit: store?.timeLimit || 20,
       unlimitedTime: false,
       winningScore: store?.winningScore || DEFAULT_WINNING_SCORE,
-      penalty: 5,
+      penalty: store?.penaltyPoints || DEFAULT_PENALTY,
     },
   });
 
@@ -51,6 +52,7 @@ const AdminConfigs = ({ store, onDone }: Props) => {
       storeName: store?.storeName || "",
       pointsPerGrain: data.pointsPerGrain,
       pointsPerGrass: data.pointsPerGrass,
+      penaltyPoints: data.penalty,
       unlimitedTime: false,
       timeLimit: data.timeLimit,
       winningScore: data.winningScore,
