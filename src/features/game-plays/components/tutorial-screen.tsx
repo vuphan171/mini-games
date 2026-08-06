@@ -23,8 +23,9 @@ const IMG_PROPS = {
   decoding: "sync",
 } as const;
 
-const getRewardTierLabel = (result: (typeof RewardResults)[keyof typeof RewardResults]) =>
-  REWARD_TIERS.find((tier) => tier.result === result)?.label ?? "";
+const getRewardTierLabel = (
+  result: (typeof RewardResults)[keyof typeof RewardResults],
+) => REWARD_TIERS.find((tier) => tier.result === result)?.label ?? "";
 
 const GIFTS = [
   {
@@ -143,7 +144,7 @@ export default function TutorialScreen({ config, onStart }: Props) {
           ))}
         </ul>
 
-        <p className="mt-6 text-center text-lg font-semibold">
+        <p className="mt-4 text-center text-lg font-semibold">
           Chú ý:{" "}
           <span className="font-normal">
             Bạn sẽ không thể giành chiến thắng nếu để siêu bò va chạm với các
@@ -156,7 +157,7 @@ export default function TutorialScreen({ config, onStart }: Props) {
 
   const renderInstructions = () => {
     return (
-      <section className="mt-8 flex justify-center flex-col items-center">
+      <section className="mt-6 flex justify-center flex-col items-center">
         <div className="flex items-center justify-center gap-10">
           <img
             src={IcArrow}
@@ -204,7 +205,17 @@ export default function TutorialScreen({ config, onStart }: Props) {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden bg-black/50 p-6">
-      <p className="text-xl font-bold text-white">Bắt đầu sau</p>
+      <div className="flex w-full max-w-xl flex-col rounded-3xl bg-white p-6 shadow-card md:max-w-2xl lg:max-w-5xl">
+        <h2 className="mb-4 text-center text-2xl font-bold text-foreground">
+          HƯỚNG DẪN CÁCH CHƠI
+        </h2>
+        <div className="flex flex-col gap-5 lg:flex-row">
+          {renderLeft()}
+          {renderRight()}
+        </div>
+        {renderInstructions()}
+      </div>
+      <p className="mt-6 text-xl font-bold text-white">Bắt đầu sau</p>
       <p className="text-6xl font-bold text-white">{count}s</p>
       <Button
         type="button"
@@ -215,16 +226,6 @@ export default function TutorialScreen({ config, onStart }: Props) {
       >
         CHƠI NGAY
       </Button>
-      <div className="mt-10 flex w-full max-w-xl flex-col rounded-3xl bg-white p-6 shadow-card md:max-w-2xl lg:max-w-5xl">
-        <h2 className="mb-6 text-center text-2xl font-bold text-foreground">
-          HƯỚNG DẪN CÁCH CHƠI
-        </h2>
-        <div className="flex flex-col gap-5 lg:flex-row">
-          {renderLeft()}
-          {renderRight()}
-        </div>
-        {renderInstructions()}
-      </div>
     </div>
   );
 }

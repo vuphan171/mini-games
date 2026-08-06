@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { GameOutcome, GameResultKind } from "../../types";
+import type { Customer, GameOutcome, GameResultKind } from "../../types";
 import type { GameConfigs } from "../../configs/game";
 import ScoreBadge from "./components/score-badge";
 import TimeBadge from "./components/time-badge";
@@ -169,10 +169,11 @@ interface GameState {
 
 interface Props {
   config: GameConfigs;
+  customer: Customer;
   onFinish: (result: GameOutcome) => void;
 }
 
-const GameScreen = ({ config, onFinish }: Props) => {
+const GameScreen = ({ config, customer, onFinish }: Props) => {
   const cfg = useRef<GameConfigs>(config).current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const coinLayerRef = useRef<HTMLDivElement>(null);
@@ -235,6 +236,8 @@ const GameScreen = ({ config, onFinish }: Props) => {
       onFinishRef.current({
         score: g.score,
         result,
+        fullName: customer.customerName,
+        phoneNumber: customer.phone,
         playedSeconds: Math.round((performance.now() - g.startTime) / 1000),
       });
     };

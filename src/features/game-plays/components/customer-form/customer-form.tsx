@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,6 +46,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         email: "",
         phone: "",
         store: "",
+        termsAccepted: false,
       },
     });
 
@@ -176,12 +178,12 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                       className="capitalize"
                       htmlFor={field.name}
                     >
-                      Email
+                      Số hoá đơn
                     </FieldLabel>
                     <Input
                       {...field}
                       id={field.name}
-                      placeholder="a@email.com"
+                      placeholder="HD123456"
                       aria-invalid={fieldState.invalid}
                     />
                     {fieldState.isTouched && fieldState.invalid && (
@@ -248,12 +250,46 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                 )}
               />
             </div>
+
+            <div className="col-span-12">
+              <Controller
+                name="termsAccepted"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    data-invalid={fieldState.invalid}
+                    orientation="horizontal"
+                  >
+                    <Checkbox
+                      id={field.name}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldLabel className="font-normal" htmlFor={field.name}>
+                      Tôi đã đọc và đồng ý với các{" "}
+                      <a
+                        className="text-blue-500 hover:underline cursor-pointer"
+                        href="https://docs.google.com/document/d/1YF3C_6U9FYPeBPcTXL0wCEf1hGpOoxY2hTJKSQv7It4/edit?tab=t.0"
+                        target="_blank"
+                      >
+                        Điều khoản và Điều kiện
+                      </a>
+                    </FieldLabel>
+                    {fieldState.isTouched && fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
           </div>
           <Button
             type="submit"
             size="2xl"
             variant="game"
-            disabled={!formState.isValid || formState.isSubmitting}
+            disabled={!formState.isValid}
+            loading={formState.isSubmitting}
             className="mt-10 w-full"
           >
             BẮT ĐẦU CHƠI

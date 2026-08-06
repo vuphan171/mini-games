@@ -89,8 +89,12 @@ const MiniGames = () => {
           onStart={startGame}
         />
       )}
-      {screen === GAME_SCREENS.game && selectedStore && (
-        <PlayGame config={toGameConfigs(selectedStore)} onFinish={finishGame} />
+      {screen === GAME_SCREENS.game && selectedStore && customer && (
+        <PlayGame
+          config={toGameConfigs(selectedStore)}
+          onFinish={finishGame}
+          customer={customer}
+        />
       )}
       {screen === GAME_SCREENS.result && outcome && (
         <ResultScreen

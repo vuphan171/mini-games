@@ -4,22 +4,24 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
 import APIService from "@/services/api-service";
 import type { Store, UpdateStorePayload } from "@/types/store";
-import { GAME_SPEED_OPTIONS, GameSpeeds, DEFAULT_WINNING_SCORE } from "./configs";
+import {
+  GAME_SPEED_OPTIONS,
+  GameSpeeds,
+  DEFAULT_WINNING_SCORE,
+} from "./configs";
 import { schema, type SettingsFormValues } from "./schema";
 import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 const POINTS_STEP = 5;
-const TIME_LIMIT_STEP = 5;
+const PENALTY_STEP = 5;
 
 type Props = {
   store: Store;
@@ -30,28 +32,26 @@ const AdminConfigs = ({ store, onDone }: Props) => {
   const {
     control,
     handleSubmit,
-    watch,
     formState: { isSubmitting },
   } = useForm<SettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       gameSpeed: store.gameSpeed || GameSpeeds.normal,
-      pointsPerGrain: store?.pointsPerGrain || 10,
-      pointsPerGrass: store?.pointsPerGrass || 10,
-      timeLimit: store?.timeLimit || 15,
-      unlimitedTime: store?.unlimitedTime || false,
+      pointsPerGrain: store?.pointsPerGrain || 2,
+      pointsPerGrass: store?.pointsPerGrass || 2,
+      timeLimit: store?.timeLimit || 20,
+      unlimitedTime: false,
       winningScore: store?.winningScore || DEFAULT_WINNING_SCORE,
+      penalty: 5,
     },
   });
-
-  const unlimitedTime = watch("unlimitedTime");
 
   const onSubmit = async (data: SettingsFormValues) => {
     const payload: UpdateStorePayload = {
       storeName: store?.storeName || "",
       pointsPerGrain: data.pointsPerGrain,
       pointsPerGrass: data.pointsPerGrass,
-      unlimitedTime: data.unlimitedTime,
+      unlimitedTime: false,
       timeLimit: data.timeLimit,
       winningScore: data.winningScore,
       gameSpeed: data.gameSpeed,
@@ -142,106 +142,36 @@ const AdminConfigs = ({ store, onDone }: Props) => {
               />
             </div>
 
-            <div className="border-t border-divider-warm" />
-
-            <Field
-              className="flex has-[>[data-slot=field-content]]:items-center"
-              orientation="horizontal"
-            >
-              <FieldContent>
-                <FieldLabel htmlFor="unlimitedTime" className="font-semibold">
-                  Không giới hạn thời gian chơi
-                </FieldLabel>
-              </FieldContent>
-              <Controller
-                control={control}
-                name="unlimitedTime"
-                render={({ field }) => (
-                  <Switch
-                    id="unlimitedTime"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
+            <Controller
+              name="penalty"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field
+                  className="col-span-12 sm:col-span-6"
+                  data-invalid={fieldState.invalid}
+                >
+                  <FieldLabel htmlFor={field.name} className="font-semibold">
+                    Điểm phạt khi chạm vật phẩm
+                  </FieldLabel>
+                  <InputStepper
+                    {...field}
+                    id={field.name}
+                    type="number"
+                    aria-invalid={fieldState.invalid}
+                    onDecrease={() =>
+                      field.onChange(Math.max(0, field.value - PENALTY_STEP))
+                    }
+                    onIncrease={() =>
+                      field.onChange(field.value + PENALTY_STEP)
+                    }
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
-                )}
-              />
-            </Field>
-            <div className="ml-4 col-span-12">
-              {!unlimitedTime ? (
-                <Controller
-                  name="timeLimit"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      className="flex flex-col items-center gap-2 md:flex-row"
-                      data-invalid={fieldState.invalid}
-                    >
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="font-semibold"
-                      >
-                        Thời gian mỗi lượt chơi (giây)
-                      </FieldLabel>
-                      <InputStepper
-                        {...field}
-                        id={field.name}
-                        type="number"
-                        aria-invalid={fieldState.invalid}
-                        onDecrease={() =>
-                          field.onChange(
-                            Math.max(0, (field.value ?? 0) - TIME_LIMIT_STEP),
-                          )
-                        }
-                        onIncrease={() =>
-                          field.onChange(
-                            (field.value ?? 0) + TIME_LIMIT_STEP,
-                          )
-                        }
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-                />
-              ) : (
-                <Controller
-                  name="winningScore"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field
-                      className="flex flex-col items-center gap-2 md:flex-row"
-                      data-invalid={fieldState.invalid}
-                    >
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="font-semibold"
-                      >
-                        Điểm để thắng
-                      </FieldLabel>
-                      <InputStepper
-                        {...field}
-                        id={field.name}
-                        type="number"
-                        aria-invalid={fieldState.invalid}
-                        onDecrease={() =>
-                          field.onChange(
-                            Math.max(0, (field.value ?? 0) - POINTS_STEP),
-                          )
-                        }
-                        onIncrease={() =>
-                          field.onChange((field.value ?? 0) + POINTS_STEP)
-                        }
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
+                </Field>
               )}
-            </div>
+            />
 
             <div className="border-t border-divider-warm" />
 

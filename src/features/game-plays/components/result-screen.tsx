@@ -14,7 +14,7 @@ import GiftShirt from "@/assets/logos/gift-shirt.png";
 import GiftKeyChain from "@/assets/logos/gift-keychain.png";
 import GiftBall from "@/assets/logos/gift-ball.png";
 import AppLogo from "@/assets/logos/app-logo.png";
-import { cn } from "@/lib/utils";
+import { cn, formatVietnamesePhone } from "@/lib/utils";
 
 interface Props {
   outcome: GameOutcome;
@@ -85,6 +85,9 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
           className={`text-6xl font-extrabold ${isWin ? "text-win" : "text-lose"}`}
         >
           {isWin ? "CHIẾN THẮNG!" : "THUA RỒI!"}
+        </p>
+        <p className="mt-3 text-4xl font-semibold text-muted-foreground">
+          {outcome.fullName} · {formatVietnamesePhone(outcome.phoneNumber)}
         </p>
         <div className="mt-8 rounded-xl border w-full flex border-brand-tertiary divide-x divide-brand-tertiary">
           <div className="flex-1 flex flex-col">
