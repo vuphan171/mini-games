@@ -38,7 +38,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
     queryFn: APIService.getStores,
   });
 
-  const { control, reset, getValues, handleSubmit, formState } =
+  const { control, setValue, getValues, handleSubmit, formState } =
     useForm<TCustomerSchema>({
       resolver: zodResolver(customerSchema),
       mode: "onChange",
@@ -46,7 +46,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         name: "",
         invoice: "",
         phone: "",
-        store: getStoreCode() || "",
+        store: "",
         termsAccepted: false,
       },
     });
@@ -55,13 +55,12 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
 
   useEffect(() => {
     if (!storeId) return;
+    if (!stores.length) return;
+    if (!stores.some((s) => s.storeID === storeId)) return;
 
     saveStoreCode(storeId);
-
-    reset({
-      store: storeId,
-    });
-  }, [reset, storeId]);
+    setValue("store", storeId, { shouldValidate: true });
+  }, [setValue, storeId, stores]);
 
   const onSubmit = async (data: TCustomerSchema) => {
     try {
@@ -244,7 +243,11 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                       disabled={isLoadingStores}
                     >
                       <SelectTrigger size="lg" id="store" className="w-full">
-                        <SelectValue placeholder="Chọn cửa hàng" />
+                        <SelectValue
+                          placeholder={
+                            isLoadingStores ? "Đang tải..." : "Chọn cửa hàng"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {stores.map((s) => (
