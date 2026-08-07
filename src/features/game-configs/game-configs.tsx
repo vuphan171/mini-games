@@ -21,8 +21,8 @@ import { InputStepper } from "@/components/ui/input-stepper";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
-const POINTS_STEP = 5;
-const PENALTY_STEP = 5;
+const POINTS_STEP = 1;
+const PENALTY_STEP = 1;
 
 type Props = {
   store: Store;

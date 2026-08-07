@@ -23,6 +23,7 @@ import CowHoldingBall from "@/assets/logos/cow-holding-ball.png";
 import AppLogo from "@/assets/logos/app-logo.png";
 import { useEffect } from "react";
 import type { Store } from "@/types/store";
+import { getStoreCode, saveStoreCode } from "@/lib/utils";
 
 type Props = {
   onStart: (customer: Customer, store: Store) => void;
@@ -45,18 +46,22 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
         name: "",
         invoice: "",
         phone: "",
-        store: "",
+        store: getStoreCode() || "",
         termsAccepted: false,
       },
     });
 
+  const storeId = getStoreCode() || (stores?.length ? stores[0].storeID : "");
+
   useEffect(() => {
-    const storeId = stores?.length ? stores[stores.length - 1].storeID : "";
     if (!storeId) return;
+
+    saveStoreCode(storeId);
+
     reset({
       store: storeId,
     });
-  }, [reset, stores]);
+  }, [reset, storeId]);
 
   const onSubmit = async (data: TCustomerSchema) => {
     try {
@@ -115,7 +120,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                 height={100}
                 src={CowHoldingBall}
                 alt="Cow Holding Ball"
-                fetchPriority="high"
+                {...{ fetchpriority: "high" }}
                 loading="eager"
                 decoding="sync"
               />
@@ -130,7 +135,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                 src={AppLogo}
                 className="h-28 w-auto"
                 alt="App Logo"
-                fetchPriority="high"
+                {...{ fetchpriority: "high" }}
                 loading="eager"
                 decoding="sync"
               />
@@ -232,7 +237,10 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                     </FieldLabel>
                     <Select
                       value={field.value}
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        saveStoreCode(value);
+                      }}
                       disabled={isLoadingStores}
                     >
                       <SelectTrigger size="lg" id="store" className="w-full">
@@ -288,7 +296,9 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
             type="submit"
             size="2xl"
             variant="game"
-            disabled={!formState.isValid || formState.isSubmitting}
+            disabled={
+              !formState.isValid || formState.isSubmitting || isLoadingStores
+            }
             loading={formState.isSubmitting}
             className="mt-10 w-full"
           >

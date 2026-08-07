@@ -67,7 +67,7 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
             src={AppLogo}
             className="h-32 w-auto"
             alt="App Logo"
-            fetchPriority="high"
+            {...{ fetchpriority: "high" }}
             loading="eager"
             decoding="sync"
           />
@@ -76,7 +76,7 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
             height={175}
             src={isWin ? CowWin : CowLose}
             alt="Cow Holding Ball"
-            fetchPriority="high"
+            {...{ fetchpriority: "high" }}
             loading="eager"
             decoding="sync"
           />
