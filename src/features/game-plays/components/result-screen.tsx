@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +20,6 @@ interface Props {
   onDone: () => void;
 }
 
-const RESULT_COUNTDOWN_SECONDS = 5;
-
 const getGiftImage = (result: RewardResult): string => {
   switch (result) {
     case RewardResults.keyChain:
@@ -35,17 +32,6 @@ const getGiftImage = (result: RewardResult): string => {
 };
 
 const ResultScreen = ({ outcome, onDone }: Props) => {
-  const [countdown, setCountdown] = useState(RESULT_COUNTDOWN_SECONDS);
-
-  useEffect(() => {
-    const t = setInterval(() => setCountdown((c) => c - 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (countdown <= 0) onDone();
-  }, [countdown, onDone]);
-
   const isWin = outcome.result !== "lose_obstacle";
   const tier = getRewardTier(outcome.score);
 
@@ -134,9 +120,10 @@ const ResultScreen = ({ outcome, onDone }: Props) => {
           type="submit"
           size="2xl"
           variant="game"
+          onClick={onDone}
           className="mt-6 w-fit px-10"
         >
-          LƯỢT TIẾP THEO {countdown}s
+          LƯỢT TIẾP THEO
         </Button>
       </div>
     </div>

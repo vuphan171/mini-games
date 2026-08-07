@@ -428,7 +428,7 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
 
   const hudTime = cfg.unlimitedTime
     ? `${score}/${cfg.winningScore}`
-    : `Còn lại: ${timeLeft}s`;
+    : `Còn lại: ${timeLeft} s`;
 
   return (
     <div className="flex items-center justify-center" style={CONTAINER_STYLE}>

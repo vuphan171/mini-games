@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useCountdown } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
 import type { GameConfigs } from "../configs/game";
 import { REWARD_TIERS, RewardResults } from "../configs/reward-tiers";
@@ -14,8 +12,6 @@ import GiftKeyChain from "@/assets/logos/gift-keychain.png";
 import GiftBall from "@/assets/logos/gift-ball.png";
 import IcHand from "@/assets/logos/ic-hand.png";
 import IcArrow from "@/assets/logos/ic-arrow.png";
-
-const COUNTDOWN_SECONDS = 30;
 
 const IMG_PROPS = {
   fetchPriority: "high",
@@ -57,19 +53,6 @@ interface Props {
 }
 
 export default function TutorialScreen({ config, onStart }: Props) {
-  const [count, { startCountdown }] = useCountdown({
-    countStart: COUNTDOWN_SECONDS,
-    intervalMs: 1000,
-  });
-
-  useEffect(() => {
-    startCountdown();
-  }, [startCountdown]);
-
-  useEffect(() => {
-    if (count === 0) onStart();
-  }, [count, onStart]);
-
   const SCORING_ITEMS = [
     {
       src: Grains,
@@ -95,8 +78,8 @@ export default function TutorialScreen({ config, onStart }: Props) {
         </h3>
       </header>
 
-      <div className="flex items-start gap-2 px-3 py-5 justify-between">
-        <ul className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-start gap-4 px-3 py-5 justify-between">
+        <ul className="space-y-4 sm:flex-2">
           {SCORING_ITEMS.map(({ src, alt, width, height, label }) => (
             <li key={alt} className="flex items-center gap-4">
               <img
@@ -113,11 +96,11 @@ export default function TutorialScreen({ config, onStart }: Props) {
           ))}
         </ul>
 
-        <ul className="flex items-center">
+        <ul className="flex items-center justify-between w-full sm:flex-3">
           {GIFTS.map(({ src, alt, label }) => (
             <li key={alt} className="flex flex-col items-center">
               <img src={src} alt={alt} className="h-20 w-auto" {...IMG_PROPS} />
-              <p className="text-center text-lg font-bold leading-snug text-foreground">
+              <p className="whitespace-pre-line text-center text-lg font-bold leading-snug text-foreground">
                 {label}
               </p>
             </li>
@@ -195,7 +178,8 @@ export default function TutorialScreen({ config, onStart }: Props) {
           />
         </div>
         <p className="mt-16 text-lg font-normal max-w-xl text-center">
-          Trong thời gian <span className="font-semibold">30 giây</span> hãy
+          Trong thời gian{" "}
+          <span className="font-semibold">{config.timeLimit} giây</span> hãy
           nhấn giữ kéo siêu bò qua PHẢI/ TRÁI để nhận vật phẩm, nhớ né các chứng
           ngại nguy hiểm nhé!
         </p>
@@ -215,13 +199,11 @@ export default function TutorialScreen({ config, onStart }: Props) {
         </div>
         {renderInstructions()}
       </div>
-      <p className="mt-6 text-xl font-bold text-white">Bắt đầu sau</p>
-      <p className="text-6xl font-bold text-white">{count}s</p>
       <Button
         type="button"
         size="2xl"
         variant="game"
-        className="mt-4 w-fit self-center px-10"
+        className="mt-8 w-fit self-center px-10"
         onClick={onStart}
       >
         CHƠI NGAY

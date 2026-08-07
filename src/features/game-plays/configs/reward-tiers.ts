@@ -14,12 +14,12 @@ export interface RewardTier {
 }
 
 export const REWARD_TIERS: RewardTier[] = [
-  { min: 0, max: 50, label: "0 - 50 điểm", result: RewardResults.keyChain },
-  { min: 51, max: 80, label: "51 - 80 điểm", result: RewardResults.shirt },
+  { min: 0, max: 50, label: "0 - 50\nđiểm", result: RewardResults.keyChain },
+  { min: 51, max: 80, label: "51 - 80\nđiểm", result: RewardResults.shirt },
   {
     min: 81,
     max: Infinity,
-    label: "81 - 100 điểm",
+    label: "81 - 100\nđiểm",
     result: RewardResults.ball,
   },
 ];
