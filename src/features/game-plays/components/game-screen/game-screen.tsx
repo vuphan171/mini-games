@@ -337,7 +337,7 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
         Math.min(size.width - SPAWN_MARGIN_X, g.cowX),
       );
 
-      if (now - g.lastSpawnItem > 750 / sp) {
+      if (now - g.lastSpawnItem > 950 / sp) {
         g.lastSpawnItem = now;
         g.entities.push({
           kind: "item",
@@ -346,7 +346,7 @@ const GameScreen = ({ config, customer, onFinish }: Props) => {
           y: -40,
         });
       }
-      if (now - g.lastSpawnObs > 1600 / sp) {
+      if (now - g.lastSpawnObs > 1200 / sp) {
         g.lastSpawnObs = now;
         const t = (["vaccine", "virus", "ref"] as const)[
           Math.floor(Math.random() * 3)

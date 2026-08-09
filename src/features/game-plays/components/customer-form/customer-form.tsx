@@ -71,7 +71,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
       const customer = await APIService.createCustomer({
         storeID: store.storeID,
         customerName: data.name,
-        invoice: data.invoice,
+        invoice: data?.invoice || "",
         phone: data.phone,
         score: 0,
         playDuration: 0,
@@ -178,7 +178,7 @@ const CustomerForm = ({ onStart, onOpenConfig }: Props) => {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel
-                      required
+                      required={false}
                       className="capitalize"
                       htmlFor={field.name}
                     >
